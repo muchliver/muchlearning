@@ -360,6 +360,40 @@
     };
   }
 
+  /**
+   * 格式化注音字串：
+   * 1. 清除 HTML 雜質及附加備註 (如 /td>、相似詞等)
+   * 2. 確保每個字的注音之間有清晰的「全形空格　」或顯著間隔隔開，利於學生辨認
+   *    例："ㄉ｜ㄥˋ ㄕㄨ ㄐ｜" ➔ "ㄉ｜ㄥˋ　ㄕㄨ　ㄐ｜"
+   *    若資料庫原為黏合無空格字串（如 "ㄉㄢˇㄑㄩㄝˋ" 或 "ㄉㄧㄥˋㄕㄨㄐㄧ"），亦能依聲韻調自動智慧切分並隔開
+   */
+  function formatZhuyin(rawZhuyin) {
+    if (!rawZhuyin || typeof rawZhuyin !== 'string') return '';
+    let clean = rawZhuyin
+      .replace(/<[^>]+>/g, '')
+      .replace(/\/td>.*$/i, '')
+      .replace(/相似詞.*$/i, '')
+      .replace(/反義詞.*$/i, '')
+      .trim();
+
+    if (!clean) return '';
+
+    // 檢查是否已有空白隔開各字
+    let parts = clean.split(/\s+/).filter(s => s.length > 0);
+
+    // 若字串長度大於 2 且全部連在一起無空格（例如 ㄉㄢˇㄑㄩㄝˋ 或 ㄉㄧㄥˋㄕㄨㄐㄧ），依聲母與調號邊界智慧分詞
+    if (parts.length === 1 && clean.length > 2) {
+      const segmented = clean
+        .replace(/([ˊˇˋ])([ㄅ-ㄙㄧㄨㄩ｜ㄚ-ㄦ])/g, '$1 $2')
+        .replace(/([ㄧㄨㄩ｜ㄚ-ㄦ])(˙[ㄅ-ㄙㄧㄨㄩ｜ㄚ-ㄦ])/g, '$1 $2')
+        .replace(/([ㄧㄨㄩ｜ㄚ-ㄦ])([ㄅ-ㄙ])/g, '$1 $2');
+      parts = segmented.split(/\s+/).filter(s => s.length > 0);
+    }
+
+    // 每個字的注音以顯著的全形空格「　」隔開，極致清晰利於學生辨認
+    return parts.join('　');
+  }
+
   // ============================================================================
   // 8 大題型建構器 (Question Builders)
   // ============================================================================
@@ -392,13 +426,14 @@
   // 2. 國字注音辨別題 (Zhuyin & Character Transcription)
   function buildZhuyinQuestion(item) {
     if (!item || !item.word || !item.zhuyin) return null;
+    const formattedItemZhuyin = formatZhuyin(item.zhuyin);
     const isWriteChar = Math.random() > 0.5;
 
     if (isWriteChar) {
       // 看音寫國字
       let sentence = item.example || `請寫出「${item.word}」的國字。`;
       if (sentence.includes(item.word)) {
-        sentence = sentence.replace(item.word, `（　　）[注音：${item.zhuyin}]`);
+        sentence = sentence.replace(item.word, `（　　）[注音：${formattedItemZhuyin}]`);
       }
       const pool = (item.type === 'idiom') ? bankByType.idiom : bankByType.vocabulary;
       const distractors = getRandomSample(pool.filter(i => i.word !== item.word), 3).map(i => i.word);
@@ -409,7 +444,7 @@
         quizType: 'zhuyin',
         subType: 'write_char',
         promptSentence: sentence,
-        promptLabel: `【看音辨國字】（注音：${item.zhuyin}）`,
+        promptLabel: `【看音辨國字】（注音：${formattedItemZhuyin}）`,
         options,
         correctAnswer: item.word,
         handwriteHint: `國字填寫：（ ＿＿＿＿ ）`
@@ -420,9 +455,9 @@
       if (sentence.includes(item.word)) {
         sentence = sentence.replace(item.word, `【${item.word}】`);
       }
-      // 生成干擾注音 (抽其他詞條之注音)
-      const distractors = getRandomSample(bankByType.withZhuyin.filter(i => i.zhuyin !== item.zhuyin), 3).map(i => i.zhuyin);
-      const options = shuffleArray([item.zhuyin, ...distractors]);
+      // 生成干擾注音 (抽其他詞條之注音，並經由 formatZhuyin 格式化)
+      const distractors = getRandomSample(bankByType.withZhuyin.filter(i => i.zhuyin !== item.zhuyin), 3).map(i => formatZhuyin(i.zhuyin));
+      const options = shuffleArray([formattedItemZhuyin, ...distractors]);
 
       return {
         ...item,
@@ -431,7 +466,7 @@
         promptSentence: sentence,
         promptLabel: `【看字辨注音】請選出【${item.word}】的正確注音`,
         options,
-        correctAnswer: item.zhuyin,
+        correctAnswer: formattedItemZhuyin,
         handwriteHint: `注音填寫：（ ＿＿＿＿ ）`
       };
     }
@@ -812,7 +847,7 @@
       const qDiv = document.createElement('div');
       qDiv.className = 'question-item';
 
-      const zhuyinHtml = (showZhuyin && q.zhuyin) ? `<span class="q-zhuyin-tag">(${q.zhuyin})</span>` : '';
+      const zhuyinHtml = (showZhuyin && q.zhuyin) ? `<span class="q-zhuyin-tag">(${formatZhuyin(q.zhuyin)})</span>` : '';
 
       if (q.quizType === 'zhuyin') {
         // 國字注音辨別題
@@ -1003,7 +1038,7 @@
           <div class="ans-title-row">
             <span class="ans-badge" style="background:#e0f2fe; color:#0369a1;">第 ${qNum} 題 國字注音</span>
             <span style="color:#000; font-weight:800; font-size:1.05rem;">正解：(${q._correctLetter}) ${q.correctAnswer}</span>
-            <span class="ans-word">${q.word} (${q.zhuyin})</span>
+            <span class="ans-word">${q.word} (${formatZhuyin(q.zhuyin)})</span>
           </div>
           <div class="ans-desc"><b>【字詞釋義】</b>${q.definition || '無'}</div>
           ${q.example ? `<div class="ans-full-ex"><b>【完整例句】</b>${q.example}</div>` : ''}
@@ -1023,7 +1058,7 @@
           <div class="ans-title-row">
             <span class="ans-badge" style="background:#fef3c7; color:#92400e;">第 ${qNum} 題 情境素養</span>
             <span style="color:#000; font-weight:800; font-size:1.05rem;">正解：(${q._correctLetter}) ${q.correctAnswer}</span>
-            <span class="ans-word">【${q.word}】 (${q.zhuyin})</span>
+            <span class="ans-word">【${q.word}】 (${formatZhuyin(q.zhuyin)})</span>
           </div>
           <div class="ans-desc"><b>【成語釋義】</b>${q.definition || '無'}</div>
           ${q.example ? `<div class="ans-full-ex"><b>【生活範例】</b>${q.example}</div>` : ''}
@@ -1043,7 +1078,7 @@
             <span style="color:#000; font-weight:800; font-size:1.05rem;">正解：(${q._correctLetter}) ${q.correctAnswer}</span>
             <span class="ans-word">錯字「${q.typoChar}」➔ 正字「${q.targetChar}」</span>
           </div>
-          <div class="ans-desc"><b>【詞條正字】</b><strong>${q.word}</strong> (${q.zhuyin}) ｜ 釋義：${q.definition || '無'}</div>
+          <div class="ans-desc"><b>【詞條正字】</b><strong>${q.word}</strong> (${formatZhuyin(q.zhuyin)}) ｜ 釋義：${q.definition || '無'}</div>
           <div class="ans-full-ex"><b>【正確原句】</b>${q.example}</div>
         `;
       } else if (q.quizType === 'unscramble') {
@@ -1071,7 +1106,7 @@
           <div class="ans-title-row">
             <span class="ans-badge">第 ${qNum} 題 克漏字</span>
             <span style="color:#000; font-weight:800; font-size:1.05rem;">正解：(${q._correctLetter}) ${q.correctAnswer}</span>
-            <span class="ans-word">${q.word} (${q.zhuyin})</span>
+            <span class="ans-word">${q.word} (${formatZhuyin(q.zhuyin)})</span>
           </div>
           <div class="ans-desc"><b>【詞義釋義】</b>${q.definition || '無'}</div>
           ${q.example ? `<div class="ans-full-ex"><b>【完整例句】</b>${q.example}</div>` : ''}

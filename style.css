@@ -552,9 +552,17 @@ body {
 
 .q-zhuyin-tag {
   display: inline-block;
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-left: 6px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #1e40af;
+  background-color: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 1px 8px;
+  border-radius: 6px;
+  margin-left: 8px;
+  letter-spacing: 0.05em;
+  word-spacing: 0.35em;
+  vertical-align: middle;
 }
 
 .q-hint-text {
