@@ -564,23 +564,40 @@ body {
   padding-left: 20px;
 }
 
-/* 選擇題選項列 */
+/* 選擇題選項列 (單欄預設：4 欄橫排) */
 .q-options-row {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  gap: 8px 12px;
   margin-top: 8px;
-  padding-left: 20px;
+  padding-left: 16px;
 }
 
 .q-option-choice {
   font-size: 0.9rem;
   color: #222;
+  white-space: nowrap;
+  word-break: keep-all;
+  min-width: 0;
 }
 
 .q-option-choice b {
   color: #000;
-  margin-right: 2px;
+  margin-right: 4px;
+}
+
+/* 雙欄密集模式專用：每欄寬度減半，將 4 選項改為 2x2 雙欄排列，確保單一選項內容完整連續不折行 */
+.questions-container.layout-double .q-options-row {
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px 16px;
+  padding-left: 8px;
+}
+
+.questions-container.layout-double .q-option-choice {
+  font-size: 0.88rem;
+  white-space: nowrap;
+  word-break: keep-all;
+  min-width: 0;
 }
 
 /* 照樣造句 / 句型練習 手寫作答橫線格 */
