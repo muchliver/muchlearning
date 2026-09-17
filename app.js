@@ -692,6 +692,200 @@
     };
   }
 
+  /**
+   * 為短語照樣造句生成具體的「建議仿寫參考答案」與「句構語法特徵解析」
+   * 確保解答券提供至少 1～2 個結構對齊、詞性對應且文意通順的示範答案供批改與學習
+   */
+  function getSentenceMimicGuidance(item) {
+    const raw = (item.word || item.example || item.title || '').replace(/[。！?？]/g, '').trim();
+    const clean = raw.replace(/[()（）]/g, '').trim();
+
+    // 1. 精準對應庫 (涵蓋最核心、常見的課本經典短語)
+    const EXACT_MAP = {
+      '幽默且獨到的生活智慧': {
+        structure: '（形容詞）且（形容詞）的（偏正名詞）',
+        suggestions: ['溫和且堅定的處事態度', '豐富且多元的課外閱讀', '溫馨且難忘的童年回憶']
+      },
+      '一輪火紅的夕陽': {
+        structure: '（數量詞）＋（形容詞）的（名詞）',
+        suggestions: ['一抹湛藍的晴空', '一片金黃的麥浪', '一輪皎潔的明月']
+      },
+      '搖著荷葉上的水': {
+        structure: '（動詞）著（名詞）上的（名詞）',
+        suggestions: ['望著窗台上的花', '數著夜空中的星', '撫著琴弦上的音']
+      },
+      '一面走路、一面吟誦': {
+        structure: '並列動作句構：一面（動作）、一面（動作）',
+        suggestions: ['一邊彈琴、一邊歌唱', '時而漫步、時而沉思', '一邊觀察、一邊記錄']
+      },
+      '像樹枝般昂揚的鹿角': {
+        structure: '比喻句構：像（名詞）般（形容詞）的（名詞）',
+        suggestions: ['像水晶般清澈的湖水', '像羽毛般輕盈的雪花', '像黃金般燦爛的陽光']
+      },
+      '我的世界安安靜靜、黑黑暗暗': {
+        structure: '（名詞）＋ AABB 重疊狀態詞、AABB 重疊狀態詞',
+        suggestions: ['他的歌聲清清脆脆、甜甜美美', '秋天的田野金金黃黃、豐豐盈盈', '校園的早晨熱熱鬧鬧、開開心心']
+      },
+      '臉色一陣紅一陣白': {
+        structure: '（名詞）＋ 一陣（形容詞）一陣（形容詞）',
+        suggestions: ['心情一陣喜一陣憂', '微風一陣涼一陣暖', '琴聲一陣急一陣緩']
+      },
+      '敏銳而有智慧的人': {
+        structure: '（形容詞）而（形容詞/偏正）的（名詞）',
+        suggestions: ['勤奮而有毅力的學者', '勇敢而有擔當的青年', '溫暖而有力量的雙手']
+      },
+      '滾滾的洪水': {
+        structure: '（疊字形容詞）的（名詞）',
+        suggestions: ['滔滔的江水', '蔚藍的大海', '漫漫的長夜']
+      },
+      '激發自己的潛能': {
+        structure: '（動詞）＋（代詞/名詞）的（名詞）',
+        suggestions: ['實現心中的夢想', '充實課餘的生活', '展現團隊的默契']
+      },
+      '一回又一回的篇章': {
+        structure: '一（量詞）又一（量詞）的（名詞）',
+        suggestions: ['一次又一次的挑戰', '一波又一波的浪潮', '一步又一步的堅持']
+      },
+      '滿樹的紅黃錯落': {
+        structure: '滿（名詞）的（形容詞/四字狀態詞）',
+        suggestions: ['滿地的落英繽紛', '滿天的繁星閃爍', '滿園的花香四溢']
+      },
+      '日日夜夜望著天空': {
+        structure: '（時間重疊詞）＋（動詞）著（名詞）',
+        suggestions: ['歲歲年年盼著故鄉', '朝朝暮暮守著家園', '時時刻刻念著師恩']
+      },
+      '滿山都是綠油油的森林': {
+        structure: '（處所詞）都是（疊字狀態詞）的（名詞）',
+        suggestions: ['遍地都是金燦燦的落葉', '整座都是香噴噴的花海', '湖面都是藍汪汪的波光']
+      },
+      '沉入深深的海底': {
+        structure: '（動態趨向詞）＋（疊字形容詞）的（名詞）',
+        suggestions: ['飛向高高的晴空', '走入靜靜的密林', '奔向寬寬的草原']
+      },
+      '讓樹木一棵棵成長': {
+        structure: '讓（名詞）一（量詞疊字）（動詞）',
+        suggestions: ['讓幼苗一株株茁壯', '讓夢想一步步實現', '讓友誼一天天加深']
+      },
+      '聞一聞葉片的氣味': {
+        structure: '（動詞）一（動詞）＋（名詞）的（名詞）',
+        suggestions: ['看一看天邊的彩霞', '聽一聽林間的鳥鳴', '嚐一嚐鮮果的滋味']
+      },
+      '為了得到更好的答案': {
+        structure: '為了（動詞）更（形容詞）的（名詞）',
+        suggestions: ['為了追求更卓越的表現', '為了創造更美好的明天', '為了守護更珍貴的友誼']
+      },
+      '踏上尋夢的旅程': {
+        structure: '（動詞）＋（動賓/偏正）的（名詞）',
+        suggestions: ['揚起希望的風帆', '點亮智慧的明燈', '翻開歷史的篇章']
+      },
+      '靜靜的看著星空': {
+        structure: '（疊字副詞）的（動詞）著（名詞）',
+        suggestions: ['悄悄的走進教室', '輕輕的撫摸花瓣', '默默的許下心願']
+      },
+      '輕輕的微風吹拂著臉龐': {
+        structure: '（疊字形容詞）的（名詞）＋（動詞）著（名詞）',
+        suggestions: ['溫暖的陽光灑落在大地', '清涼的雨滴滋潤著花草', '柔和的月光照耀著湖面']
+      }
+    };
+
+    if (EXACT_MAP[clean]) {
+      return EXACT_MAP[clean];
+    }
+    for (let k in EXACT_MAP) {
+      if (clean.includes(k) || k.includes(clean)) {
+        return EXACT_MAP[k];
+      }
+    }
+
+    // 2. 智慧句構規則推論引擎 (覆蓋任意短語題目)
+    if (clean.includes('像') && clean.includes('般') && clean.includes('的')) {
+      return {
+        structure: '比喻句構：像（名詞）般（形容詞）的（名詞）',
+        suggestions: ['像水晶般清澈的泉水', '像羽毛般輕盈的雪花', '像明鏡般平靜的湖面']
+      };
+    }
+    if (clean.includes('且') && clean.includes('的')) {
+      return {
+        structure: '並列修飾句構：（形容詞）且（形容詞）的（偏正名詞）',
+        suggestions: ['溫和且堅定的處事態度', '豐富且多元的課外閱讀', '誠懇且真摯的友誼連結']
+      };
+    }
+    if (clean.includes('而') && clean.includes('的')) {
+      return {
+        structure: '轉折遞進句構：（形容詞）而（有偏正/形容詞）的（名詞）',
+        suggestions: ['勤奮而有毅力的學者', '深奧而有哲理的故事', '簡約而有質感的佈置']
+      };
+    }
+    if (clean.includes('一面') || clean.includes('一邊')) {
+      return {
+        structure: '並列動作句構：一邊（雙音節動作）、一邊（雙音節動作）',
+        suggestions: ['一邊唱歌、一邊跳舞', '時而奔跑、時而停留', '一邊閱讀、一邊筆記']
+      };
+    }
+    if (clean.includes('著') && (clean.includes('上') || clean.includes('裡') || clean.includes('中'))) {
+      return {
+        structure: '動態空間句構：（動詞）著（名詞）（空間方位詞）的（名詞）',
+        suggestions: ['望著窗台上的鮮花', '數著夜空中的繁星', '撫著琴弦上的旋律']
+      };
+    }
+    if (clean.includes('一陣') || clean.includes('一回') || clean.includes('一次')) {
+      return {
+        structure: '節奏交替句構：（名詞）＋ 一陣（形容詞）一陣（形容詞）',
+        suggestions: ['心情一陣欣喜一陣擔憂', '微風一陣涼爽一陣溫暖', '浪花一陣平緩一陣洶湧']
+      };
+    }
+    if (/^[一兩三四五六七八九十滿整片條座輪抹個疊本棵].+的.+/.test(clean)) {
+      return {
+        structure: '數量修飾句構：（數量/量詞）＋（形容詞）的（名詞）',
+        suggestions: ['一抹湛藍的晴空', '一片金黃的麥浪', '一輪皎潔的明月']
+      };
+    }
+    if (clean.includes('一') && clean.includes('成長')) {
+      return {
+        structure: '使動發展句構：讓（名詞）一（量詞疊字）（動詞）',
+        suggestions: ['讓幼苗一株株茁壯', '讓夢想一步步實現', '讓知識一點點累積']
+      };
+    }
+    if (clean.includes('一') && clean.includes('的')) {
+      return {
+        structure: '動作感官句構：（動詞）一（動詞）＋（名詞）的（名詞）',
+        suggestions: ['看一看天邊的彩霞', '聽一聽林間的鳥鳴', '品一品茶湯的芬芳']
+      };
+    }
+    if (clean.includes('為了') && clean.includes('更')) {
+      return {
+        structure: '目的句構：為了（動詞）更（形容詞）的（名詞）',
+        suggestions: ['為了追求更卓越的成就', '為了開創更美好的明天', '為了守護更純真的童心']
+      };
+    }
+    if (clean.includes('都是') && clean.includes('的')) {
+      return {
+        structure: '全景描摹句構：（處所名詞）都是（疊字狀態詞）的（名詞）',
+        suggestions: ['遍地都是金燦燦的落葉', '整座都是香噴噴的花海', '滿眼都是綠油油的草地']
+      };
+    }
+    if (clean.includes('的')) {
+      const parts = clean.split('的');
+      if (parts[0].length >= 3) {
+        return {
+          structure: `多音節偏正句構：（${parts[0]}）的（${parts[1] || '名詞'}）`,
+          suggestions: ['深情且動人的旋律', '璀璨而耀眼的晨星', '溫暖而舒適的陽光']
+        };
+      } else {
+        return {
+          structure: `形容詞偏正句構：（形容詞）的（名詞）`,
+          suggestions: ['湛藍的天空', '翠綠的群山', '清澈的溪流']
+        };
+      }
+    }
+
+    // 3. 通用標準保底答案
+    return {
+      structure: '詞性與句構對齊仿寫（字數相近、詞性對應、語意連貫）',
+      suggestions: ['漫步在寧靜的林間小徑', '迎接著清晨的第一道朝陽']
+    };
+  }
+
   // ============================================================================
   // 核心功能 1: A4 練習券出卷產生引擎 (保證 100% 題數相符)
   // ============================================================================
@@ -1091,14 +1285,27 @@
         `;
       } else if (q.quizType === 'sentence') {
         const exampleText = (q.example || q.title || '').replace(/[()（）]/g, '').replace(/。$/, '');
+        const guidance = getSentenceMimicGuidance(q);
+
         ansDiv.innerHTML = `
           <div class="ans-title-row">
             <span class="ans-badge">第 ${qNum} 題 照樣仿寫</span>
-            <span class="ans-word">示範：${exampleText}</span>
+            <span class="ans-word">題目示範：${exampleText}</span>
           </div>
-          <div class="ans-desc"><b>【標準示範例句】</b><span style="color:#059669; font-weight:700;">${exampleText}</span></div>
-          <div style="font-size:0.83rem; color:#475569; margin-top:3px; line-height:1.45;">
-            ※ <b>評分批改原則</b>：本題為開放式句構仿寫，<b>不硬性限制必須使用相同字詞</b>。只要字數節奏、詞性對稱（如動詞對動詞、名詞對名詞、並列連詞代換如「一面…一面…」寫成「一邊…一邊…」或「時而…時而…」）合理且語意流暢，均應評為滿分。
+          <div class="ans-desc" style="margin-top:4px;">
+            <b>【題目示範例句】</b><span style="color:#334155; font-weight:600;">${exampleText}</span>
+          </div>
+          <div class="ans-mimic-box" style="background:#f0fdf4; border:1px solid #bbf7d0; border-left:4px solid #10b981; padding:8px 12px; border-radius:6px; margin:6px 0;">
+            <div style="color:#065f46; font-weight:800; font-size:0.95rem; margin-bottom:4px;">
+              💡【建議仿寫參考答案】（提供教師與家長批改核對）：
+            </div>
+            <div style="color:#047857; font-weight:700; line-height:1.6; padding-left:4px;">
+              ${guidance.suggestions.map((s, sIdx) => `<div>👉 <b>建議答案 ${sIdx + 1}：</b>${s}</div>`).join('')}
+            </div>
+          </div>
+          ${guidance.structure ? `<div class="ans-desc" style="margin-top:3px;"><b>【句構特徵解析】</b><span style="color:#4f46e5; font-weight:600;">${guidance.structure}</span></div>` : ''}
+          <div style="font-size:0.82rem; color:#64748b; margin-top:4px; line-height:1.45;">
+            ※ <b>批改給分指引</b>：本題為開放式句構仿寫，<b>不硬性限制必須使用相同字詞</b>。只要字數節奏相近、詞性結構對稱（動詞對動詞、形容詞對形容詞、名詞對名詞）且語意流暢生動，均應評為滿分。
           </div>
         `;
       } else {
@@ -1413,10 +1620,12 @@
     const q = currentQuizList[currentQuizIndex];
     elements.quizResultStatus.textContent = '✨ 參考示範範例';
     elements.quizResultStatus.className = 'result-status success';
-    elements.quizCorrectAnswer.innerHTML = `標準參考：<strong>${q.example}</strong>`;
     if (q.quizType === 'sentence') {
-      elements.quizFullExample.innerHTML = `<strong>評分原則：</strong>本題為開放式仿寫，詞性搭配與節奏對齊、語意通順即可滿分，不限制使用完全相同字詞。`;
+      const guidance = getSentenceMimicGuidance(q);
+      elements.quizCorrectAnswer.innerHTML = `建議仿寫答案：<strong>${guidance.suggestions[0]}</strong>${guidance.suggestions[1] ? ` 或 <strong>${guidance.suggestions[1]}</strong>` : ''}`;
+      elements.quizFullExample.innerHTML = `<strong>題目原示範：</strong>${q.example || q.title}<br><strong>句構特徵解析：</strong>${guidance.structure}<br><span style="color:#64748b; font-size:0.85rem;">評分原則：本題為開放式仿寫，只要詞性搭配與節奏對齊、語意通順即可滿分。</span>`;
     } else {
+      elements.quizCorrectAnswer.innerHTML = `標準參考：<strong>${q.example}</strong>`;
       elements.quizFullExample.innerHTML = `<strong>結構解析：</strong>${q.definition || '詞性結構對齊，語意通順完整。'}`;
     }
     elements.quizDetailProps.textContent = '';
