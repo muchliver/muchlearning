@@ -568,6 +568,10 @@
   // 6. 造句錯字訂正 (Typo)
   function buildTypoQuestion(item) {
     if (!item || !item.word || !item.example) return null;
+    // 錯字訂正選用真實成語或常用語詞，排除含刪節號之複句連詞，避免句型過長或格式不合
+    if (item.type === 'ellipsis' || item.word.includes('…') || item.word.length > 6 || item.word.length < 2) return null;
+    // 必須在真實例句中完整包含該詞條，以確保生成的句子自然流暢生動
+    if (!item.example.includes(item.word)) return null;
 
     let targetChar = '';
     let typoChar = '';
@@ -591,9 +595,7 @@
     }
 
     const typoWord = item.word.substring(0, charIdx) + typoChar + item.word.substring(charIdx + 1);
-    let typoSentence = item.example.includes(item.word)
-      ? item.example.replace(item.word, typoWord)
-      : `他在句子中誤將「${item.word}」寫成了「${typoWord}」。`;
+    const typoSentence = item.example.replace(item.word, typoWord);
 
     const extra = ['容', '融', '榮', '急', '及', '提', '題', '步', '部', '厲', '利', '決', '絕'].filter(c => c !== targetChar && c !== typoChar);
     const options = shuffleArray([targetChar, typoChar, ...getRandomSample(extra, 2)]);
@@ -605,6 +607,7 @@
       typoChar,
       typoWord,
       typoSentence,
+      promptSentence: `下列文句中畫底線處含有一個錯別字，請選出改正後的正確字：<br>「${typoSentence.replace(typoWord, `【<u>${typoWord}</u>】`)}」`,
       options,
       correctAnswer: targetChar
     };
@@ -1135,9 +1138,6 @@
           <div class="q-options-row">
             ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
           </div>
-          <div style="font-size:0.86rem; color:#475569; margin-top:8px; padding-left:20px;">
-            ✍️ 手寫訂正欄：錯字是（ <strong>${q.typoChar}</strong> ），應改正為：（ ＿＿ ）
-          </div>
         `;
       } else if (q.quizType === 'unscramble') {
         // 重組造句題
@@ -1488,10 +1488,14 @@
       elements.quizTypeHint.textContent = '請從下列選項中選出最適當的答案';
 
       elements.quizQuestionPrompt.innerHTML = q.promptSentence || q.example;
-      elements.quizPromptHint.innerHTML = `
-        <strong>💡 導引提示：</strong>${q.definition || '請依語法與語意邏輯選出最佳選項'}
-        ${q.zhuyin ? ` ｜ <strong>注音：</strong>${q.zhuyin}` : ''}
-      `;
+      if (q.quizType === 'typo') {
+        elements.quizPromptHint.innerHTML = `💡 <b>解題提示：</b>仔細觀察句中畫底線處的詞語，找出哪一個字形是錯別字，並從選項中選出改正後的正確字。`;
+      } else {
+        elements.quizPromptHint.innerHTML = `
+          <strong>💡 導引提示：</strong>${q.definition || '請依語法與語意邏輯選出最佳選項'}
+          ${q.zhuyin ? ` ｜ <strong>注音：</strong>${formatZhuyin(q.zhuyin)}` : ''}
+        `;
+      }
 
       elements.quizOptionsContainer.innerHTML = '';
       q.options.forEach(opt => {
