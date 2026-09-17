@@ -19,43 +19,239 @@
     withZhuyin: []
   };
 
-  // 常見國語文易錯字對照庫 (用於形音義錯別字出題)
-  const COMMON_TYPO_MAP = {
-    '部': '步', '步': '部',
-    '茅': '矛', '矛': '茅',
-    '及': '急', '急': '及',
-    '厲': '利', '利': '厲',
-    '題': '提', '提': '題',
-    '規': '歸', '歸': '規',
-    '絕': '決', '決': '絕',
-    '蜂': '峰', '峰': '蜂',
-    '湧': '勇', '勇': '湧',
-    '容': '融', '融': '容',
-    '景': '井', '井': '景',
-    '致': '至', '至': '致',
-    '辨': '辯', '辯': '辨',
-    '截': '接', '接': '截',
-    '再': '在', '在': '再',
-    '度': '渡', '渡': '度',
-    '宣': '喧', '喧': '宣',
-    '蔚': '慰', '慰': '蔚',
-    '滄': '蒼', '蒼': '滄',
-    '券': '卷', '卷': '券',
-    '聯': '連', '連': '聯',
-    '藉': '借', '借': '藉',
-    '副': '幅', '幅': '副',
-    '馳': '弛', '弛': '馳',
-    '濫': '爛', '爛': '濫',
-    '璧': '壁', '壁': '璧',
-    '籌': '愁', '愁': '籌',
-    '概': '慨', '慨': '概',
-    '履': '屢', '屢': '履',
-    '鍛': '段', '練': '鍊',
-    '甘': '柑', '迫': '破',
-    '名': '明', '班': '般',
-    '抒': '舒', '煞': '殺',
-    '蹙': '促', '悄': '俏',
-    '按': '安', '首': '手'
+  // 國小國中教育部標準易錯成語對照庫 (精準形音義對照)
+  const IDIOM_TYPO_MAP = {
+    '字字珠璣': { target: '璣', typo: '譏', distractors: ['磯', '機'] },
+    '委曲求全': { target: '曲', typo: '屈', distractors: ['取', '趨'] },
+    '載歌載舞': { target: '載', typo: '再', distractors: ['在', '仔'] },
+    '按部就班': { target: '部', typo: '步', distractors: ['簿', '佈'] },
+    '迫不及待': { target: '及', typo: '急', distractors: ['即', '極'] },
+    '名列前茅': { target: '茅', typo: '矛', distractors: ['茂', '苗'] },
+    '再接再厲': { target: '厲', typo: '利', distractors: ['勵', '例'] },
+    '一籌莫展': { target: '籌', typo: '愁', distractors: ['仇', '綢'] },
+    '心無旁騖': { target: '騖', typo: '鶩', distractors: ['務', '霧'] },
+    '趨之若鶩': { target: '鶩', typo: '騖', distractors: ['霧', '誤'] },
+    '走投無路': { target: '投', typo: '頭', distractors: ['透', '偷'] },
+    '破釜沉舟': { target: '釜', typo: '斧', distractors: ['府', '俯'] },
+    '水乳交融': { target: '融', typo: '容', distractors: ['榮', '溶'] },
+    '墨守成規': { target: '規', typo: '歸', distractors: ['龜', '規'] },
+    '濫竽充數': { target: '竽', typo: '魚', distractors: ['於', '芋'] },
+    '草菅人命': { target: '菅', typo: '管', distractors: ['官', '館'] },
+    '滄海一粟': { target: '滄', typo: '蒼', distractors: ['藏', '艙'] },
+    '世外桃源': { target: '源', typo: '園', distractors: ['原', '員'] },
+    '刻骨銘心': { target: '銘', typo: '名', distractors: ['明', '鳴'] },
+    '班門弄斧': { target: '班', typo: '般', distractors: ['斑', '伴'] },
+    '甘拜下風': { target: '甘', typo: '柑', distractors: ['竿', '肝'] },
+    '怨天尤人': { target: '尤', typo: '憂', distractors: ['優', '幼'] },
+    '病入膏肓': { target: '肓', typo: '盲', distractors: ['芒', '忙'] },
+    '挑撥離間': { target: '間', typo: '漸', distractors: ['簡', '建'] },
+    '鋌而走險': { target: '鋌', typo: '挺', distractors: ['庭', '艇'] },
+    '針砭時弊': { target: '砭', typo: '貶', distractors: ['邊', '蝙'] },
+    '買櫝還珠': { target: '櫝', typo: '讀', distractors: ['獨', '牘'] },
+    '美輪美奐': { target: '輪', typo: '倫', distractors: ['論', '綸'] },
+    '汗流浹背': { target: '浹', typo: '夾', distractors: ['頰', '佳'] },
+    '言簡意賅': { target: '賅', typo: '該', distractors: ['概', '改'] },
+    '怨聲載道': { target: '載', typo: '在', distractors: ['再', '仔'] },
+    '提心吊膽': { target: '提', typo: '題', distractors: ['啼', '蹄'] },
+    '金榜題名': { target: '題', typo: '提', distractors: ['啼', '體'] },
+    '銷聲匿跡': { target: '銷', typo: '消', distractors: ['宵', '削'] },
+    '自出機杼': { target: '杼', typo: '抒', distractors: ['序', '敘'] },
+    '聲名鵲起': { target: '鵲', typo: '雀', distractors: ['確', '缺'] },
+    '名落孫山': { target: '名', typo: '明', distractors: ['鳴', '銘'] },
+    '鬼斧神工': { target: '斧', typo: '釜', distractors: ['府', '負'] },
+    '川流不息': { target: '川', typo: '穿', distractors: ['船', '串'] },
+    '不脛而走': { target: '脛', typo: '逕', distractors: ['徑', '境'] },
+    '好高騖遠': { target: '騖', typo: '務', distractors: ['霧', '誤'] },
+    '蓬蓽生輝': { target: '蓽', typo: '壁', distractors: ['璧', '畢'] },
+    '絡繹不絕': { target: '絕', typo: '決', distractors: ['掘', '覺'] },
+    '妄自菲薄': { target: '妄', typo: '忘', distractors: ['望', '汪'] },
+    '陳詞濫調': { target: '濫', typo: '爛', distractors: ['藍', '覽'] },
+    '風聲鶴唳': { target: '唳', typo: '淚', distractors: ['類', '立'] },
+    '相輔相成': { target: '成', typo: '承', distractors: ['程', '誠'] },
+    '罄竹難書': { target: '罄', typo: '慶', distractors: ['請', '親'] },
+    '大名鼎鼎': { target: '鼎', typo: '頂', distractors: ['定', '訂'] },
+    '風馳電掣': { target: '馳', typo: '弛', distractors: ['遲', '池'] },
+    '膾炙人口': { target: '炙', typo: '灸', distractors: ['炙', '久'] },
+    '嘔心瀝血': { target: '瀝', typo: '歷', distractors: ['勵', '立'] },
+    '瑕不掩瑜': { target: '瑕', typo: '暇', distractors: ['霞', '遐'] },
+    '目不暇給': { target: '暇', typo: '瑕', distractors: ['霞', '遐'] },
+    '首當其衝': { target: '首', typo: '手', distractors: ['守', '受'] },
+    '別出心裁': { target: '裁', typo: '財', distractors: ['材', '才'] },
+    '喧賓奪主': { target: '喧', typo: '宣', distractors: ['軒', '萱'] },
+    '脫穎而出': { target: '穎', typo: '影', distractors: ['景', '引'] },
+    '未雨綢繆': { target: '繆', typo: '謀', distractors: ['眸', '模'] },
+    '如火如荼': { target: '荼', typo: '茶', distractors: ['涂', '途'] },
+    '浮光掠影': { target: '掠', typo: '略', distractors: ['掠', '落'] },
+    '重蹈覆轍': { target: '轍', typo: '徹', distractors: ['澈', '撤'] },
+    '含飴弄孫': { target: '飴', typo: '怡', distractors: ['宜', '儀'] },
+    '因噎廢食': { target: '噎', typo: '業', distractors: ['夜', '葉'] },
+    '耳濡目染': { target: '濡', typo: '如', distractors: ['儒', '孺'] },
+    '一諾千金': { target: '諾', typo: '若', distractors: ['弱', '落'] },
+    '剛愎自用': { target: '愎', typo: '復', distractors: ['腹', '副'] },
+    '融會貫通': { target: '融', typo: '容', distractors: ['榮', '溶'] },
+    '心力交瘁': { target: '瘁', typo: '脆', distractors: ['翠', '粹'] },
+    '集思廣益': { target: '益', typo: '意', distractors: ['義', '議'] },
+    '精益求精': { target: '益', typo: '意', distractors: ['義', '易'] },
+    '直截了當': { target: '截', typo: '接', distractors: ['結', '節'] },
+    '出奇制勝': { target: '制', typo: '致', distractors: ['治', '智'] },
+    '仗義執言': { target: '執', typo: '直', distractors: ['植', '值'] },
+    '無懈可擊': { target: '懈', typo: '解', distractors: ['界', '借'] },
+    '氣喘吁吁': { target: '吁', typo: '噓', distractors: ['虛', '需'] },
+    '按圖索驥': { target: '驥', typo: '計', distractors: ['記', '際'] },
+    '循序漸進': { target: '漸', typo: '見', distractors: ['建', '件'] },
+    '休戚相關': { target: '戚', typo: '七', distractors: ['期', '欺'] },
+    '兢兢業業': { target: '兢', typo: '驚', distractors: ['晶', '精'] },
+    '分道揚鑣': { target: '鑣', typo: '標', distractors: ['飆', '鏢'] },
+    '孤注一擲': { target: '擲', typo: '鄭', distractors: ['正', '證'] },
+    '義憤填膺': { target: '膺', typo: '鷹', distractors: ['應', '櫻'] },
+    '一丘之貉': { target: '貉', typo: '駱', distractors: ['洛', '落'] },
+    '如雷貫耳': { target: '貫', typo: '慣', distractors: ['冠', '官'] },
+    '瞠目結舌': { target: '瞠', typo: '堂', distractors: ['常', '長'] },
+    '如釋重負': { target: '負', typo: '付', distractors: ['副', '富'] },
+    '捉襟見肘': { target: '肘', typo: '宙', distractors: ['軸', '周'] },
+    '大快朵頤': { target: '頤', typo: '儀', distractors: ['宜', '姨'] }
+  };
+
+  // 常見國語文字元級形音義易混淆字組庫
+  const CHAR_TYPO_MAP = {
+    '部': ['步', '佈', '簿'],
+    '步': ['部', '布'],
+    '矛': ['茅', '毛'],
+    '茅': ['矛', '茂'],
+    '及': ['急', '即', '極'],
+    '急': ['及', '疾', '級'],
+    '厲': ['利', '勵', '例'],
+    '利': ['厲', '俐', '立'],
+    '題': ['提', '啼', '蹄'],
+    '提': ['題', '啼', '體'],
+    '規': ['歸', '龜'],
+    '歸': ['規', '瑰'],
+    '絕': ['決', '掘', '截'],
+    '決': ['絕', '覺'],
+    '蜂': ['峰', '烽', '鋒'],
+    '峰': ['蜂', '烽', '鋒'],
+    '湧': ['勇', '踴', '泳'],
+    '勇': ['湧', '踴'],
+    '容': ['融', '榮', '榕'],
+    '融': ['容', '榮', '溶'],
+    '景': ['井', '境'],
+    '井': ['景'],
+    '致': ['至', '智', '志'],
+    '至': ['致', '志'],
+    '辨': ['辯', '辮', '辦'],
+    '辯': ['辨', '辮'],
+    '截': ['接', '結'],
+    '接': ['截', '結'],
+    '再': ['在'],
+    '在': ['再'],
+    '度': ['渡'],
+    '渡': ['度'],
+    '宣': ['喧', '暄'],
+    '喧': ['宣', '暄'],
+    '蔚': ['慰', '衛'],
+    '慰': ['蔚', '衛'],
+    '滄': ['蒼', '艙'],
+    '蒼': ['滄', '倉'],
+    '券': ['卷', '圈'],
+    '卷': ['券', '倦'],
+    '聯': ['連', '蓮'],
+    '連': ['聯', '廉'],
+    '藉': ['借', '籍'],
+    '借': ['藉', '階'],
+    '副': ['幅', '福', '富'],
+    '幅': ['副', '輻'],
+    '馳': ['弛', '池', '持'],
+    '弛': ['馳', '恥'],
+    '濫': ['爛', '藍', '籃'],
+    '爛': ['濫', '攬'],
+    '璧': ['壁', '臂', '避'],
+    '壁': ['璧', '畢'],
+    '籌': ['愁', '綢', '仇'],
+    '愁': ['籌', '仇'],
+    '概': ['慨', '溉'],
+    '慨': ['概', '凱'],
+    '履': ['屢', '縷'],
+    '屢': ['履', '縷'],
+    '段': ['鍛', '斷'],
+    '鍛': ['段', '斷'],
+    '練': ['鍊', '戀'],
+    '鍊': ['練', '連'],
+    '甘': ['柑', '肝'],
+    '柑': ['甘', '乾'],
+    '迫': ['破', '魄'],
+    '破': ['迫', '魄'],
+    '名': ['明', '鳴', '銘'],
+    '明': ['名', '鳴'],
+    '班': ['般', '斑'],
+    '般': ['班', '搬'],
+    '抒': ['舒', '殊'],
+    '舒': ['抒', '樞'],
+    '煞': ['殺', '剎'],
+    '殺': ['煞', '杉'],
+    '促': ['蹙', '卒'],
+    '蹙': ['促', '戚'],
+    '悄': ['俏', '峭'],
+    '俏': ['悄', '峭'],
+    '按': ['安', '案'],
+    '安': ['按', '岸'],
+    '首': ['手', '守'],
+    '手': ['首', '守'],
+    '曲': ['屈', '趨'],
+    '屈': ['曲', '趨'],
+    '全': ['金', '泉'],
+    '載': ['再', '在'],
+    '璣': ['譏', '磯', '機'],
+    '竽': ['魚', '芋'],
+    '魚': ['竽', '漁'],
+    '管': ['菅', '館'],
+    '菅': ['管', '官'],
+    '源': ['園', '原'],
+    '園': ['源', '員'],
+    '銘': ['名', '明', '鳴'],
+    '尤': ['憂', '優'],
+    '憂': ['尤', '悠'],
+    '肓': ['盲', '忙'],
+    '盲': ['肓', '芒'],
+    '鋌': ['挺', '艇'],
+    '挺': ['鋌', '庭'],
+    '砭': ['貶', '邊'],
+    '貶': ['砭', '扁'],
+    '櫝': ['讀', '獨'],
+    '讀': ['櫝', '瀆'],
+    '輪': ['倫', '淪', '綸'],
+    '倫': ['輪', '論'],
+    '浹': ['夾', '頰'],
+    '夾': ['浹', '狹'],
+    '賅': ['該', '改'],
+    '該': ['賅', '概'],
+    '銷': ['消', '宵', '削'],
+    '消': ['銷', '硝'],
+    '杼': ['抒', '序'],
+    '鵲': ['雀', '確'],
+    '雀': ['鵲', '缺'],
+    '斧': ['釜', '甫'],
+    '釜': ['斧', '府'],
+    '川': ['穿', '串'],
+    '穿': ['川', '傳'],
+    '脛': ['逕', '徑'],
+    '逕': ['脛', '勁'],
+    '騖': ['鶩', '務', '霧'],
+    '鶩': ['騖', '霧', '誤'],
+    '瑕': ['暇', '霞', '遐'],
+    '暇': ['瑕', '霞', '遐'],
+    '荼': ['茶', '涂'],
+    '茶': ['荼', '查'],
+    '裁': ['財', '材'],
+    '徹': ['轍', '澈', '撤'],
+    '轍': ['徹', '澈'],
+    '飴': ['怡', '頤'],
+    '怡': ['飴', '宜'],
+    '噎': ['業', '夜'],
+    '業': ['噎', '頁'],
+    '萃': ['悴', '粹', '瘁'],
+    '瘁': ['粹', '悴', '脆'],
+    '益': ['意', '溢', '逸'],
+    '意': ['益', '義', '議']
   };
 
   // 線上測驗狀態
@@ -576,29 +772,48 @@
     let targetChar = '';
     let typoChar = '';
     let charIdx = -1;
+    let customDistractors = [];
 
-    for (let i = 0; i < item.word.length; i++) {
-      const ch = item.word[i];
-      if (COMMON_TYPO_MAP[ch]) {
-        targetChar = ch;
-        typoChar = COMMON_TYPO_MAP[ch];
-        charIdx = i;
-        break;
+    // 1. 優先匹配常考成語專用標準錯別字庫
+    if (IDIOM_TYPO_MAP[item.word]) {
+      const entry = IDIOM_TYPO_MAP[item.word];
+      targetChar = entry.target;
+      typoChar = entry.typo;
+      customDistractors = entry.distractors || [];
+      charIdx = item.word.indexOf(targetChar);
+    } else {
+      // 2. 搜尋詞條中是否含有國語文常考易錯字組
+      const matchIndices = [];
+      for (let i = 0; i < item.word.length; i++) {
+        if (CHAR_TYPO_MAP[item.word[i]]) {
+          matchIndices.push(i);
+        }
+      }
+      if (matchIndices.length > 0) {
+        charIdx = matchIndices[Math.floor(Math.random() * matchIndices.length)];
+        targetChar = item.word[charIdx];
+        const candidates = CHAR_TYPO_MAP[targetChar];
+        typoChar = candidates[Math.floor(Math.random() * candidates.length)];
       }
     }
 
-    if (!targetChar) {
-      charIdx = Math.floor(Math.random() * item.word.length);
-      targetChar = item.word[charIdx];
-      const fallbackList = ['及', '急', '以', '已', '即', '提', '題', '部', '步', '歷', '厲', '絕', '決', '湧', '勇'];
-      typoChar = fallbackList.find(c => c !== targetChar) || '其';
-    }
+    // 🌟 核心防禦：若該詞條不含任何合理標準錯別字對照，嚴禁胡亂硬湊，直接放棄換抽下一題！
+    if (!targetChar || !typoChar || charIdx < 0) return null;
 
     const typoWord = item.word.substring(0, charIdx) + typoChar + item.word.substring(charIdx + 1);
     const typoSentence = item.example.replace(item.word, typoWord);
 
-    const extra = ['容', '融', '榮', '急', '及', '提', '題', '步', '部', '厲', '利', '決', '絕'].filter(c => c !== targetChar && c !== typoChar);
-    const options = shuffleArray([targetChar, typoChar, ...getRandomSample(extra, 2)]);
+    let distractors = [];
+    if (customDistractors && customDistractors.length >= 2) {
+      distractors = customDistractors.slice(0, 2);
+    } else {
+      const candidates = CHAR_TYPO_MAP[targetChar] ? CHAR_TYPO_MAP[targetChar].filter(c => c !== typoChar) : [];
+      const fallbackList = ['容', '融', '榮', '提', '題', '步', '部', '厲', '利', '決', '絕', '全', '曲', '屈', '載', '再', '名', '明', '園', '源', '急', '及', '致', '至', '辨', '辯'].filter(c => c !== targetChar && c !== typoChar && !candidates.includes(c));
+      const needed = 2 - candidates.length;
+      distractors = [...candidates, ...(needed > 0 ? getRandomSample(fallbackList, needed) : [])].slice(0, 2);
+    }
+
+    const options = shuffleArray([targetChar, typoChar, ...distractors]);
 
     return {
       ...item,
