@@ -15,6 +15,15 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body class="theme-light">
+  <!-- 題庫載入中指示遮罩 (僅初次載入時顯示，列印時自動隱藏) -->
+  <div id="appLoader" class="app-loader no-print">
+    <div class="loader-card">
+      <div class="loader-spinner"></div>
+      <div class="loader-text">📚 正在載入題庫大數據...</div>
+      <div class="loader-sub">全量 31,302 筆成語、語詞、短語與句型資料庫</div>
+    </div>
+  </div>
+
   <!-- 頂部導航欄 (列印時自動隱藏) -->
   <header class="app-header no-print">
     <div class="header-container">
@@ -318,7 +327,7 @@
 
   </main>
 
-  <script src="./data/question_bank.js"></script>
-  <script src="app.js"></script>
+  <script src="./data/question_bank.js" defer></script>
+  <script src="app.js" defer></script>
 </body>
 </html>

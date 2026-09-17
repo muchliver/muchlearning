@@ -142,7 +142,26 @@
     initTheme();
     bindEvents();
 
-    if (window.QUESTION_BANK && Array.isArray(window.QUESTION_BANK) && window.QUESTION_BANK.length > 0) {
+    if (window.QUESTION_BANK_COMPACT && Array.isArray(window.QUESTION_BANK_COMPACT)) {
+      const typeMap = ['vocabulary', 'idiom', 'sentence', 'ellipsis'];
+      const catNameMap = ['國小國中常用語詞', '成語熟語', '短語練習', '句型練習'];
+      const unpacked = window.QUESTION_BANK_COMPACT.map((row, idx) => ({
+        id: `item-${idx}`,
+        type: typeMap[row[0]],
+        category_name: catNameMap[row[0]],
+        word: row[1],
+        title: row[1],
+        zhuyin: row[2] || '',
+        definition: row[3] || '',
+        example: row[4] || '',
+        synonyms: row[5] || '',
+        antonyms: row[6] || '',
+        template: row[7] || row[1],
+        pattern: row[7] || row[1],
+        difficulty: (row[0] === 1 || row[0] === 3) ? 'junior_high' : 'elementary'
+      }));
+      processBank(unpacked);
+    } else if (window.QUESTION_BANK && Array.isArray(window.QUESTION_BANK) && window.QUESTION_BANK.length > 0) {
       processBank(window.QUESTION_BANK);
     } else {
       try {
@@ -173,6 +192,13 @@
     generateWorksheet();
     startNewQuizSession('idiom');
     initDictSearch();
+
+    // 關閉載入中遮罩
+    const loader = document.getElementById('appLoader');
+    if (loader) {
+      loader.style.opacity = '0';
+      setTimeout(() => { loader.style.display = 'none'; }, 300);
+    }
   }
 
   function initTheme() {
