@@ -145,21 +145,25 @@
     if (window.QUESTION_BANK_COMPACT && Array.isArray(window.QUESTION_BANK_COMPACT)) {
       const typeMap = ['vocabulary', 'idiom', 'sentence', 'ellipsis'];
       const catNameMap = ['國小國中常用語詞', '成語熟語', '短語練習', '句型練習'];
-      const unpacked = window.QUESTION_BANK_COMPACT.map((row, idx) => ({
-        id: `item-${idx}`,
-        type: typeMap[row[0]],
-        category_name: catNameMap[row[0]],
-        word: row[1],
-        title: row[1],
-        zhuyin: row[2] || '',
-        definition: row[3] || '',
-        example: row[4] || '',
-        synonyms: row[5] || '',
-        antonyms: row[6] || '',
-        template: row[7] || row[1],
-        pattern: row[7] || row[1],
-        difficulty: (row[0] === 1 || row[0] === 3) ? 'junior_high' : 'elementary'
-      }));
+      const unpacked = window.QUESTION_BANK_COMPACT.map((rawRow, idx) => {
+        const row = Array.isArray(rawRow) ? rawRow : (rawRow && rawRow.value ? rawRow.value : []);
+        const tIdx = typeof row[0] === 'number' ? row[0] : 0;
+        return {
+          id: `item-${idx}`,
+          type: typeMap[tIdx] || 'vocabulary',
+          category_name: catNameMap[tIdx] || '國小國中常用語詞',
+          word: row[1] || '',
+          title: row[1] || '',
+          zhuyin: row[2] || '',
+          definition: row[3] || '',
+          example: row[4] || '',
+          synonyms: row[5] || '',
+          antonyms: row[6] || '',
+          template: row[7] || row[1] || '',
+          pattern: row[7] || row[1] || '',
+          difficulty: (tIdx === 1 || tIdx === 3) ? 'junior_high' : 'elementary'
+        };
+      });
       processBank(unpacked);
     } else if (window.QUESTION_BANK && Array.isArray(window.QUESTION_BANK) && window.QUESTION_BANK.length > 0) {
       processBank(window.QUESTION_BANK);
@@ -170,12 +174,14 @@
         processBank(data);
       } catch (err) {
         console.error('無法載入題庫 JSON:', err);
+        const loader = document.getElementById('appLoader');
+        if (loader) loader.style.display = 'none';
       }
     }
   }
 
   function processBank(data) {
-    rawBank = data;
+    rawBank = data || [];
     bankByType = {
       idiom: rawBank.filter(i => i.type === 'idiom'),
       vocabulary: rawBank.filter(i => i.type === 'vocabulary'),
@@ -189,15 +195,19 @@
       elements.totalWordCount.textContent = rawBank.length.toLocaleString();
     }
 
-    generateWorksheet();
-    startNewQuizSession('idiom');
-    initDictSearch();
-
-    // 關閉載入中遮罩
-    const loader = document.getElementById('appLoader');
-    if (loader) {
-      loader.style.opacity = '0';
-      setTimeout(() => { loader.style.display = 'none'; }, 300);
+    try {
+      generateWorksheet();
+      startNewQuizSession('idiom');
+      initDictSearch();
+    } catch (err) {
+      console.error('初始化出題或測驗錯誤:', err);
+    } finally {
+      // 關閉載入中遮罩
+      const loader = document.getElementById('appLoader');
+      if (loader) {
+        loader.style.opacity = '0';
+        setTimeout(() => { loader.style.display = 'none'; }, 300);
+      }
     }
   }
 
@@ -1435,5 +1445,18 @@
     appendDictCardsBatch();
   }
 
-  document.addEventListener('DOMContentLoaded', initApp);
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+  } else {
+    initApp();
+  }
+
+  // 兜底保證：超時 4 秒自動淡出遮罩
+  setTimeout(() => {
+    const loader = document.getElementById('appLoader');
+    if (loader && loader.style.display !== 'none') {
+      loader.style.opacity = '0';
+      setTimeout(() => { loader.style.display = 'none'; }, 300);
+    }
+  }, 4000);
 })();
