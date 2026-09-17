@@ -135,52 +135,96 @@
     btnLoadMoreDict: document.getElementById('btnLoadMoreDict')
   };
 
+  // 高品質即時啟動題庫 (保證頁面 0 毫秒秒開並立即呈現試卷，不需等待後台大數據)
+  const STARTER_BANK = [
+    { id: 's-1', type: 'idiom', category_name: '成語熟語', word: '守株待兔', title: '守株待兔', zhuyin: 'ㄕㄡˇ ㄓㄨ ㄉㄞˋ ㄊㄨˋ', definition: '比喻拘泥守舊，不知變通，妄想不勞而獲。', example: '做事要腳踏實地，如果只是守株待兔，終究不會有成果。', synonyms: '刻舟求劍', antonyms: '', template: '守株待兔', pattern: '守株待兔', difficulty: 'junior_high' },
+    { id: 's-2', type: 'idiom', category_name: '成語熟語', word: '井底之蛙', title: '井底之蛙', zhuyin: 'ㄐㄧㄥˇ ㄉㄧˇ ㄓ ㄨㄚ', definition: '比喻見識狹窄、眼界狹小的人。', example: '我們應該多方學習、開拓視野，千萬不要成為自滿的井底之蛙。', synonyms: '目光短淺', antonyms: '見多識廣', template: '井底之蛙', pattern: '井底之蛙', difficulty: 'junior_high' },
+    { id: 's-3', type: 'idiom', category_name: '成語熟語', word: '胸有成竹', title: '胸有成竹', zhuyin: 'ㄒㄩㄥ ㄧㄡˇ ㄔㄥˊ ㄓㄨˊ', definition: '比喻處事已具備完整計畫與充分把握。', example: '經過連日充分準備，他在上台報告前顯得胸有成竹。', synonyms: '心中有數', antonyms: '束手無策', template: '胸有成竹', pattern: '胸有成竹', difficulty: 'junior_high' },
+    { id: 's-4', type: 'idiom', category_name: '成語熟語', word: '水落石出', title: '水落石出', zhuyin: 'ㄕㄨㄟˇ ㄌㄨㄛˋ ㄕˊ ㄔㄨ', definition: '比喻事情的真相完全顯露出來。', example: '經過警方的縝密調查，案情終於水落石出。', synonyms: '真相大白', antonyms: '撲朔迷離', template: '水落石出', pattern: '水落石出', difficulty: 'junior_high' },
+    { id: 's-5', type: 'idiom', category_name: '成語熟語', word: '畫龍點睛', title: '畫龍點睛', zhuyin: 'ㄏㄨㄚˋ ㄌㄨㄥˊ ㄉㄧㄢˇ ㄐㄧㄥ', definition: '比喻在關鍵處加上精闢字句，使內容更加生動有力。', example: '這幅畫加上落日餘暉的色彩，真有畫龍點睛的奇妙效果。', synonyms: '錦上添花', antonyms: '畫蛇添足', template: '畫龍點睛', pattern: '畫龍點睛', difficulty: 'junior_high' },
+    { id: 's-6', type: 'idiom', category_name: '成語熟語', word: '走馬看花', title: '走馬看花', zhuyin: 'ㄗㄡˇ ㄇㄚˇ ㄎㄢˋ ㄏㄨㄚ', definition: '比喻粗略瀏覽，未能深入了解事物精華。', example: '這座博物館館藏極為豐富，如果只是走馬看花實在大為可惜。', synonyms: '浮光掠影', antonyms: '觀察入微', template: '走馬看花', pattern: '走馬看花', difficulty: 'junior_high' },
+    { id: 's-7', type: 'idiom', category_name: '成語熟語', word: '名副其實', title: '名副其實', zhuyin: 'ㄇㄧㄥˊ ㄈㄨˋ ㄑㄧˊ ㄕˊ', definition: '名聲或名稱與實質內容完全相符。', example: '他熱心助人且處事正直，是一位名副其實的優秀模範生。', synonyms: '名不虛傳', antonyms: '名不副實', template: '名副其實', pattern: '名副其實', difficulty: 'junior_high' },
+    { id: 's-8', type: 'idiom', category_name: '成語熟語', word: '亡羊補牢', title: '亡羊補牢', zhuyin: 'ㄨㄤˊ ㄧㄤˊ ㄅㄨˇ ㄌㄠˊ', definition: '比喻犯錯或遭遇挫折後及時補救，尚可防患未然。', example: '現在發現錯誤還不算太晚，亡羊補牢猶未為晚。', synonyms: '及時補救', antonyms: '執迷不悟', template: '亡羊補牢', pattern: '亡羊補牢', difficulty: 'junior_high' },
+    { id: 's-9', type: 'vocabulary', category_name: '國小國中常用語詞', word: '徘徊', title: '徘徊', zhuyin: 'ㄆㄞˊ ㄏㄨㄞˊ', definition: '在一個地方來回走動，或形容猶豫不決的樣子。', example: '他在校門口來回徘徊，不知道該如何向老師解釋遲到的原因。', synonyms: '盤桓', antonyms: '果決', template: '徘徊', pattern: '徘徊', difficulty: 'elementary' },
+    { id: 's-10', type: 'vocabulary', category_name: '國小國中常用語詞', word: '謹慎', title: '謹慎', zhuyin: 'ㄐㄧㄣˇ ㄕㄣˋ', definition: '小心仔細，慎重不苟。', example: '處理重要文件時必須格外謹慎，以免發生錯誤。', synonyms: '小心', antonyms: '粗心', template: '謹慎', pattern: '謹慎', difficulty: 'elementary' },
+    { id: 's-11', type: 'vocabulary', category_name: '國小國中常用語詞', word: '敏捷', title: '敏捷', zhuyin: 'ㄇㄧㄣˇ ㄐㄧㄝˊ', definition: '動作或思維靈敏迅速。', example: '獵豹以敏捷的身手在草原上奔馳追逐獵物。', synonyms: '靈活', antonyms: '遲鈍', template: '敏捷', pattern: '敏捷', difficulty: 'elementary' },
+    { id: 's-12', type: 'vocabulary', category_name: '國小國中常用語詞', word: '吩咐', title: '吩咐', zhuyin: 'ㄈㄣ ㄈㄨˋ', definition: '口頭指派或囑託事情。', example: '媽媽出門前特地吩咐我要把客廳收拾乾淨。', synonyms: '叮囑', antonyms: '', template: '吩咐', pattern: '吩咐', difficulty: 'elementary' },
+    { id: 's-13', type: 'vocabulary', category_name: '國小國中常用語詞', word: '謙虛', title: '謙虛', zhuyin: 'ㄑㄧㄢ ㄒㄩ', definition: '虛心不自誇，能聽取別人的意見。', example: '即使屢獲大獎，他依然保持謙虛待人的態度。', synonyms: '虛心', antonyms: '傲慢', template: '謙虛', pattern: '謙虛', difficulty: 'elementary' },
+    { id: 's-14', type: 'vocabulary', category_name: '國小國中常用語詞', word: '沉思', title: '沉思', zhuyin: 'ㄔㄣˊ ㄙ', definition: '深切思考，專注冥想。', example: '面對難解的數學題目，他雙手托腮陷入了沉思。', synonyms: '深思', antonyms: '', template: '沉思', pattern: '沉思', difficulty: 'elementary' },
+    { id: 's-15', type: 'vocabulary', category_name: '國小國中常用語詞', word: '燦爛', title: '燦爛', zhuyin: 'ㄘㄢˋ ㄌㄢˋ', definition: '形容光彩鮮明奪目，或笑容生動美好。', example: '夏日的夜空中綻放著燦爛奪目的煙火。', synonyms: '絢麗', antonyms: '黯淡', template: '燦爛', pattern: '燦爛', difficulty: 'elementary' },
+    { id: 's-16', type: 'vocabulary', category_name: '國小國中常用語詞', word: '澎湃', title: '澎湃', zhuyin: 'ㄆㄥˊ ㄆㄞˋ', definition: '波浪相激撞擊的聲勢，比喻氣勢磅礡或情緒激動。', example: '聽完這場感人肺腑的演說，大家心中澎湃不已。', synonyms: '洶湧', antonyms: '平靜', template: '澎湃', pattern: '澎湃', difficulty: 'elementary' },
+    { id: 's-17', type: 'sentence', category_name: '短語練習', word: '一面走路、一面吟誦', title: '一面走路、一面吟誦', zhuyin: '', definition: '並列動作短語練習', example: '一面走路、一面吟誦', synonyms: '', antonyms: '', template: '一面走路、一面吟誦', pattern: '一面走路、一面吟誦', difficulty: 'elementary' },
+    { id: 's-18', type: 'sentence', category_name: '短語練習', word: '像樹枝般昂揚的鹿角', title: '像樹枝般昂揚的鹿角', zhuyin: '', definition: '比喻修飾短語練習', example: '像樹枝般昂揚的鹿角', synonyms: '', antonyms: '', template: '像樹枝般昂揚的鹿角', pattern: '像樹枝般昂揚的鹿角', difficulty: 'elementary' },
+    { id: 's-19', type: 'sentence', category_name: '短語練習', word: '靜靜的看著星空', title: '靜靜的看著星空', zhuyin: '', definition: '副詞動作受詞短語練習', example: '靜靜的看著星空', synonyms: '', antonyms: '', template: '靜靜的看著星空', pattern: '靜靜的看著星空', difficulty: 'elementary' },
+    { id: 's-20', type: 'sentence', category_name: '短語練習', word: '輕輕的微風吹拂著臉龐', title: '輕輕的微風吹拂著臉龐', zhuyin: '', definition: '形容詞主詞動作短語練習', example: '輕輕的微風吹拂著臉龐', synonyms: '', antonyms: '', template: '輕輕的微風吹拂著臉龐', pattern: '輕輕的微風吹拂著臉龐', difficulty: 'elementary' },
+    { id: 's-21', type: 'ellipsis', category_name: '句型練習', word: '不僅有…和…還有…', title: '不僅有…和…還有…', zhuyin: '', definition: '遞進複句造句練習', example: '這次旅行不僅有美麗的風景和豐富的文化體驗，還有無數令人感動的回憶。', synonyms: '', antonyms: '', template: '不僅有…和…還有…', pattern: '不僅有…和…還有…', difficulty: 'junior_high' },
+    { id: 's-22', type: 'ellipsis', category_name: '句型練習', word: '一方面…另一方面…', title: '一方面…另一方面…', zhuyin: '', definition: '並列複句造句練習', example: '他一方面希望能有更多時間休息，另一方面又擔心工作進度落後。', synonyms: '', antonyms: '', template: '一方面…另一方面…', pattern: '一方面…另一方面…', difficulty: 'junior_high' },
+    { id: 's-23', type: 'ellipsis', category_name: '句型練習', word: '像…般…', title: '像…般…', zhuyin: '', definition: '比喻複句造句練習', example: '她的笑容像陽光般溫暖人心。', synonyms: '', antonyms: '', template: '像…般…', pattern: '像…般…', difficulty: 'junior_high' },
+    { id: 's-24', type: 'ellipsis', category_name: '句型練習', word: '如果…還會…', title: '如果…還會…', zhuyin: '', definition: '假設遞進複句造句練習', example: '老師說如果我努力持續下去，就還會有更大的進步。', synonyms: '', antonyms: '', template: '如果…還會…', pattern: '如果…還會…', difficulty: 'junior_high' }
+  ];
+
   // ============================================================================
-  // 初始化與題庫載入
+  // 初始化與題庫載入 (採用秒開啟動 + 背景無縫載入全量題庫)
   // ============================================================================
-  async function initApp() {
+  function initApp() {
     initTheme();
     bindEvents();
 
-    if (window.QUESTION_BANK_COMPACT && Array.isArray(window.QUESTION_BANK_COMPACT)) {
-      const typeMap = ['vocabulary', 'idiom', 'sentence', 'ellipsis'];
-      const catNameMap = ['國小國中常用語詞', '成語熟語', '短語練習', '句型練習'];
-      const unpacked = window.QUESTION_BANK_COMPACT.map((rawRow, idx) => {
-        const row = Array.isArray(rawRow) ? rawRow : (rawRow && rawRow.value ? rawRow.value : []);
-        const tIdx = typeof row[0] === 'number' ? row[0] : 0;
-        return {
-          id: `item-${idx}`,
-          type: typeMap[tIdx] || 'vocabulary',
-          category_name: catNameMap[tIdx] || '國小國中常用語詞',
-          word: row[1] || '',
-          title: row[1] || '',
-          zhuyin: row[2] || '',
-          definition: row[3] || '',
-          example: row[4] || '',
-          synonyms: row[5] || '',
-          antonyms: row[6] || '',
-          template: row[7] || row[1] || '',
-          pattern: row[7] || row[1] || '',
-          difficulty: (tIdx === 1 || tIdx === 3) ? 'junior_high' : 'elementary'
-        };
-      });
-      processBank(unpacked);
-    } else if (window.QUESTION_BANK && Array.isArray(window.QUESTION_BANK) && window.QUESTION_BANK.length > 0) {
-      processBank(window.QUESTION_BANK);
-    } else {
-      try {
-        const res = await fetch('./data/question_bank.json');
-        const data = await res.json();
-        processBank(data);
-      } catch (err) {
-        console.error('無法載入題庫 JSON:', err);
-        const loader = document.getElementById('appLoader');
-        if (loader) loader.style.display = 'none';
-      }
-    }
+    // 1. 0 毫秒極速啟動：立刻使用啟動題庫渲染頁面與試卷
+    processBank(STARTER_BANK, false);
+
+    // 2. 背景非同步載入 31,302 筆全量大題庫
+    loadFullBankBackground();
   }
 
-  function processBank(data) {
+  function loadFullBankBackground() {
+    let attempts = 0;
+    const maxAttempts = 100; // 最多輪詢 15 秒
+
+    const timer = setInterval(() => {
+      attempts++;
+      if (window.QUESTION_BANK_COMPACT && Array.isArray(window.QUESTION_BANK_COMPACT) && window.QUESTION_BANK_COMPACT.length > 0) {
+        clearInterval(timer);
+        unpackAndApplyFullBank(window.QUESTION_BANK_COMPACT);
+      } else if (window.QUESTION_BANK && Array.isArray(window.QUESTION_BANK) && window.QUESTION_BANK.length > 0) {
+        clearInterval(timer);
+        processBank(window.QUESTION_BANK, true);
+      } else if (attempts >= maxAttempts) {
+        clearInterval(timer);
+        console.log('背景題庫載入超時，維持啟動題庫運作');
+      }
+    }, 150);
+  }
+
+  function unpackAndApplyFullBank(compactRows) {
+    const typeMap = ['vocabulary', 'idiom', 'sentence', 'ellipsis'];
+    const catNameMap = ['國小國中常用語詞', '成語熟語', '短語練習', '句型練習'];
+    
+    const unpacked = compactRows.map((rawRow, idx) => {
+      const row = Array.isArray(rawRow) ? rawRow : (rawRow && rawRow.value ? rawRow.value : []);
+      const tIdx = typeof row[0] === 'number' ? row[0] : 0;
+      return {
+        id: `item-${idx}`,
+        type: typeMap[tIdx] || 'vocabulary',
+        category_name: catNameMap[tIdx] || '國小國中常用語詞',
+        word: row[1] || '',
+        title: row[1] || '',
+        zhuyin: row[2] || '',
+        definition: row[3] || '',
+        example: row[4] || '',
+        synonyms: row[5] || '',
+        antonyms: row[6] || '',
+        template: row[7] || row[1] || '',
+        pattern: row[7] || row[1] || '',
+        difficulty: (tIdx === 1 || tIdx === 3) ? 'junior_high' : 'elementary'
+      };
+    });
+
+    processBank(unpacked, true);
+    console.log(`✅ 全量題庫已成功就緒：${unpacked.length} 筆資料`);
+  }
+
+  function processBank(data, isFullBank) {
     rawBank = data || [];
     bankByType = {
       idiom: rawBank.filter(i => i.type === 'idiom'),
@@ -196,18 +240,13 @@
     }
 
     try {
-      generateWorksheet();
-      startNewQuizSession('idiom');
+      if (!isFullBank) {
+        generateWorksheet();
+        startNewQuizSession('idiom');
+      }
       initDictSearch();
     } catch (err) {
-      console.error('初始化出題或測驗錯誤:', err);
-    } finally {
-      // 關閉載入中遮罩
-      const loader = document.getElementById('appLoader');
-      if (loader) {
-        loader.style.opacity = '0';
-        setTimeout(() => { loader.style.display = 'none'; }, 300);
-      }
+      console.error('出題或初始化錯誤:', err);
     }
   }
 
