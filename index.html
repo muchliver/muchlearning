@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>造句救星出題練習系統 | 國小國中語文練習・成語挑戰・進階出題與 A4 學習單列印</title>
+  <meta name="description" content="全量 31,302 筆題庫，支援克漏字、錯字訂正、重組造句、國字注音辨別、近義詞替換、成語情境素養題、關聯詞複句與照樣造句，提供 A4 練習券與解答列印。">
+  
+  <!-- Google Fonts: Noto Sans TC & Noto Serif TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Noto+Serif+TC:wght@600;700;900&display=swap" rel="stylesheet">
+  
+  <!-- Main Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-light">
+  <!-- 頂部導航欄 (列印時自動隱藏) -->
+  <header class="app-header no-print">
+    <div class="header-container">
+      <div class="brand">
+        <div class="logo-icon">✍️</div>
+        <div>
+          <h1 class="brand-title">造句救星・出題練習系統</h1>
+          <p class="brand-subtitle">國小／國中語文練習・成語挑戰・全量 31,302 筆題庫・A4 學習單產生器</p>
+        </div>
+      </div>
+      
+      <!-- 模式切換分頁導航 -->
+      <nav class="nav-tabs">
+        <button id="tabPrint" class="tab-btn active" data-tab="print-view">
+          <span class="tab-icon">🖨️</span> A4 練習券出題與列印
+        </button>
+        <button id="tabOnline" class="tab-btn" data-tab="online-view">
+          <span class="tab-icon">🎮</span> 線上互動練習測驗
+        </button>
+        <button id="tabDict" class="tab-btn" data-tab="dict-view">
+          <span class="tab-icon">📚</span> 題庫字典檢索 (<span id="totalWordCount">載入中...</span>)
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button id="btnThemeToggle" class="icon-btn" title="切換深淺模式">
+          <span class="theme-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主內容容器 -->
+  <main class="main-container">
+
+    <!-- =================================================================== -->
+    <!-- 分頁 1: A4 練習券與解答列印產生器 -->
+    <!-- =================================================================== -->
+    <section id="print-view" class="tab-content active">
+      <div class="generator-toolbar no-print">
+        <div class="toolbar-card">
+          <div class="toolbar-header">
+            <h2>🎯 A4 試卷參數設定</h2>
+            <span class="badge badge-primary">題庫總量：31,302 筆</span>
+          </div>
+
+          <div class="controls-grid">
+            <!-- 試卷標題 -->
+            <div class="control-group">
+              <label for="paperTitleInput">試卷主標題：</label>
+              <input type="text" id="paperTitleInput" class="input-text" value="國語文造句、成語挑戰與素養練習單">
+            </div>
+
+            <!-- 副標題 / 考查範圍 -->
+            <div class="control-group">
+              <label for="paperSubtitleInput">副標題／試卷備註：</label>
+              <input type="text" id="paperSubtitleInput" class="input-text" value="詞彙理解・錯字訂正・重組造句・國字注音・素養命題評量">
+            </div>
+
+            <!-- 適用對象 / 題型範圍 -->
+            <div class="control-group">
+              <label for="targetScopeSelect">練習對象與題型專題：</label>
+              <select id="targetScopeSelect" class="select-box">
+                <option value="all">🌟 綜合全題型（克漏字 + 錯字 + 重組 + 國字注音 + 近義替換 + 情境成語 + 關聯詞 + 照樣）</option>
+                <option value="zhuyin">🔤 國字注音辨別專題（看音寫國字 / 看字辨注音）</option>
+                <option value="synonym">🔄 近義詞替換與詞義辨析專題（3,905 條近反義庫）</option>
+                <option value="situational">🎭 成語生活情境素養專題（6,224 條成語情境應用）</option>
+                <option value="conjunction">🔗 關聯詞複句邏輯選擇題（因果／轉折／遞進／假設複句）</option>
+                <option value="typo">🔍 造句錯字訂正專題（常見形音義易錯字挑錯與改正）</option>
+                <option value="unscramble">🧩 重組造句專題（文句詞組智慧重組排序）</option>
+                <option value="idiom">🏆 成語大挑戰專題（成語造句、釋義與綜合挑戰）</option>
+                <option value="elementary">🎒 國小組專用（基礎詞彙 + 國字注音 + 照樣造句）</option>
+                <option value="junior_high">🎓 國中進階組（進階成語 + 錯字訂正 + 關聯詞複句）</option>
+                <option value="sentence">📝 短語練習專題（照樣造句仿寫手寫格）</option>
+                <option value="ellipsis">🔗 句型練習專題（刪節號複句造句手寫格）</option>
+              </select>
+            </div>
+
+            <!-- 出題題數 -->
+            <div class="control-group">
+              <label for="questionCountSelect">出題題數：</label>
+              <select id="questionCountSelect" class="select-box">
+                <option value="10" selected>10 題 (精簡版，適配 1 頁 A4)</option>
+                <option value="15">15 題 (標準作業練習單)</option>
+                <option value="20">20 題 (完整段考評量試卷，兩頁)</option>
+                <option value="25">25 題 (綜合能力大評量)</option>
+              </select>
+            </div>
+
+            <!-- 版面佈局選項 -->
+            <div class="control-group">
+              <label for="layoutSelect">紙張版面配置：</label>
+              <select id="layoutSelect" class="select-box">
+                <option value="single">單欄整頁（字體大、作答格寬敞，推薦國小）</option>
+                <option value="double">雙欄密集（節省紙張、題數多時適用）</option>
+              </select>
+            </div>
+
+            <!-- 選項開關 -->
+            <div class="control-group checkboxes">
+              <label class="checkbox-label">
+                <input type="checkbox" id="chkShowZhuyin" checked>
+                <span>題目顯示注音輔助</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chkShowHeaderBox" checked>
+                <span>包含班級/姓名/座號/得分欄</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chkIncludeAnswerKey" checked>
+                <span>附帶獨立解答券 (列印於末頁，方便家長教師批改)</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="chkShowMimicPattern">
+                <span>顯示仿寫骨架結構 (填空輔助，預設不勾選為純例句自由仿寫)</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- 操作按鈕列 -->
+          <div class="toolbar-buttons">
+            <button id="btnGeneratePaper" class="btn btn-primary">
+              <span class="btn-icon">🎲</span> 隨機重新抽題出卷
+            </button>
+            <button id="btnPrintPaper" class="btn btn-success">
+              <span class="btn-icon">🖨️</span> 列印練習券／另存為 PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- A4 紙張預覽區 (列印時只有此區內的主試卷與解答券會列印) -->
+      <div class="paper-preview-wrapper">
+        <div class="paper-page a4-paper" id="worksheetPage">
+          <!-- 考卷頁首 -->
+          <div class="paper-header">
+            <div class="school-header">
+              <h1 class="paper-title" id="displayPaperTitle">國語文造句、成語挑戰與素養練習單</h1>
+              <p class="paper-subtitle" id="displayPaperSubtitle">詞彙理解・錯字訂正・重組造句・國字注音・素養命題評量</p>
+            </div>
+            
+            <div class="student-info-box" id="studentInfoBox">
+              <div class="info-item"><span class="info-label">年　級：</span>＿＿年級</div>
+              <div class="info-item"><span class="info-label">座　號：</span>＿＿號</div>
+              <div class="info-item"><span class="info-label">姓　名：</span>＿＿＿＿＿＿</div>
+              <div class="score-item"><span class="score-label">得　分：</span><span class="score-space">＿＿＿＿</span></div>
+            </div>
+          </div>
+
+          <!-- 試卷答題說明 -->
+          <div class="paper-instructions">
+            <span>【作答指引】請仔細閱讀各題題幹，選出最適當的選項，或依題目指示工整書寫國字、注音、訂正字或短語造句。</span>
+            <span class="total-marks" id="displayMarks">總題數：10 題</span>
+          </div>
+
+          <!-- 題目列表動態容器 -->
+          <div class="questions-container" id="printableQuestionsList">
+            <!-- 由 app.js 動態渲染題目 -->
+          </div>
+
+          <!-- 試卷頁腳 -->
+          <div class="paper-footer">
+            <span>造句救星語文出題系統・全量題庫 31,302 筆・第 1 頁</span>
+          </div>
+        </div>
+
+        <!-- 獨立解答券頁 (page-break-before: always) -->
+        <div class="paper-page a4-paper answer-key-page" id="answerKeyPage">
+          <div class="paper-header">
+            <div class="school-header">
+              <h2 class="answer-title">【參考解答與試題詳解】</h2>
+              <p class="paper-subtitle" id="displayAnswerSubtitle">請由家長或教師進行批改、評分與觀念指引</p>
+            </div>
+          </div>
+
+          <div class="answer-key-container" id="printableAnswerKeyList">
+            <!-- 由 app.js 動態渲染答案與解析 -->
+          </div>
+
+          <div class="paper-footer">
+            <span>造句救星語文出題系統・解答券</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- 分頁 2: 線上互動練習測驗 -->
+    <!-- =================================================================== -->
+    <section id="online-view" class="tab-content">
+      <div class="online-quiz-wrapper">
+        <div class="quiz-controls-card">
+          <div class="quiz-mode-selector">
+            <label>練習題型：</label>
+            <div class="mode-chips">
+              <button class="mode-chip active" data-mode="idiom">🏆 成語造句</button>
+              <button class="mode-chip" data-mode="zhuyin">🔤 國字注音</button>
+              <button class="mode-chip" data-mode="synonym">🔄 近義替換</button>
+              <button class="mode-chip" data-mode="situational">🎭 情境成語</button>
+              <button class="mode-chip" data-mode="conjunction">🔗 關聯複句</button>
+              <button class="mode-chip" data-mode="typo">🔍 錯字訂正</button>
+              <button class="mode-chip" data-mode="unscramble">🧩 重組造句</button>
+              <button class="mode-chip" data-mode="elementary">🎒 常用詞語</button>
+              <button class="mode-chip" data-mode="sentence">📝 照樣造句</button>
+              <button class="mode-chip" data-mode="mixed">🎲 隨機綜合</button>
+            </div>
+          </div>
+
+          <div class="quiz-stats-bar">
+            <div class="stat-pill"><span class="stat-icon">🎯</span> 當前進度：<b id="quizProgress">1 / 10</b></div>
+            <div class="stat-pill"><span class="stat-icon">⭐</span> 得分：<b id="quizScore">0</b> 分</div>
+            <div class="stat-pill"><span class="stat-icon">🔥</span> 連勝：<b id="quizStreak">0</b></div>
+            <button id="btnRestartQuiz" class="btn btn-sm btn-outline">重新開始</button>
+          </div>
+        </div>
+
+        <!-- 測驗互動卡片主體 -->
+        <div class="quiz-card-container">
+          <div class="quiz-card" id="quizCard">
+            <div class="card-top">
+              <span class="badge" id="quizCategoryBadge">成語挑戰</span>
+              <span class="quiz-hint" id="quizTypeHint">克漏字造句測驗</span>
+            </div>
+
+            <div class="question-prompt" id="quizQuestionPrompt">
+              載入題目中...
+            </div>
+
+            <div class="prompt-hint-box" id="quizPromptHint">
+              <!-- 提示內容 -->
+            </div>
+
+            <div class="options-grid" id="quizOptionsContainer">
+              <!-- 選項按鈕 -->
+            </div>
+
+            <!-- 重組造句專用互動區塊 -->
+            <div class="unscramble-interactive-box" id="quizUnscrambleContainer" style="display: none;">
+              <div class="unscramble-result-tray">
+                <span class="tray-label">目前排序：</span>
+                <div class="tray-slots" id="traySlots">
+                  <span class="empty-hint">請按順序點擊下方詞組卡片組裝句子...</span>
+                </div>
+                <button id="btnResetUnscramble" class="btn btn-sm btn-outline">重排</button>
+              </div>
+              <div class="unscramble-cards-grid" id="unscrambleCardsGrid">
+                <!-- 待選詞組卡片 -->
+              </div>
+              <button id="btnSubmitUnscramble" class="btn btn-primary btn-block" style="margin-top: 16px;">確認提交排序</button>
+            </div>
+
+            <!-- 手寫仿寫輸入區 (針對照樣造句與句型) -->
+            <div class="interactive-write-box" id="quizWriteContainer" style="display: none;">
+              <textarea id="txtUserWriting" placeholder="請在此處嘗試造句或仿寫..."></textarea>
+              <button id="btnShowWriteSample" class="btn btn-primary">查看參考範例</button>
+            </div>
+
+            <!-- 解答與解析彈出區塊 (作答後顯示) -->
+            <div class="explanation-box" id="quizExplanationBox" style="display: none;">
+              <div class="result-status" id="quizResultStatus"></div>
+              <div class="correct-answer-text" id="quizCorrectAnswer"></div>
+              <div class="full-example-text" id="quizFullExample"></div>
+              <div class="detail-props" id="quizDetailProps"></div>
+              <button id="btnNextQuestion" class="btn btn-primary btn-block">下一題 ➔</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- =================================================================== -->
+    <!-- 分頁 3: 題庫大字典檢索 -->
+    <!-- =================================================================== -->
+    <section id="dict-view" class="tab-content">
+      <div class="dict-wrapper">
+        <div class="search-bar-card">
+          <div class="search-inputs">
+            <input type="text" id="dictSearchInput" class="input-search" placeholder="🔍 全量檢索 31,302 筆成語、詞彙、注音或生活例句...">
+            <select id="dictFilterType" class="select-box">
+              <option value="all">所有類別 (31,302 筆)</option>
+              <option value="idiom">成語挑戰 (6,224 筆)</option>
+              <option value="vocabulary">常用字詞 (23,763 筆)</option>
+              <option value="sentence">短語照樣造句 (860 筆)</option>
+              <option value="ellipsis">句型刪節號造句 (455 筆)</option>
+            </select>
+          </div>
+          <div class="dict-stats-info">
+            共找到 <b id="dictResultCount">0</b> 筆相關詞條
+          </div>
+        </div>
+
+        <div class="dict-cards-grid" id="dictCardsList">
+          <!-- 動態載入卡片 -->
+        </div>
+
+        <div class="load-more-container">
+          <button id="btnLoadMoreDict" class="btn btn-outline" style="display: none;">載入更多結果</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="./data/question_bank.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

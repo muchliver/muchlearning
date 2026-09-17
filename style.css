@@ -1,0 +1,1286 @@
+/* ==============================================================================
+   造句救星出題練習系統 - 核心樣式與 A4 專業列印引擎
+   ============================================================================== */
+
+:root {
+  --primary: #4f46e5;
+  --primary-hover: #4338ca;
+  --primary-light: #eef2ff;
+  --primary-dark: #3730a3;
+  --secondary: #0ea5e9;
+  --success: #10b981;
+  --success-light: #ecfdf5;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --danger-light: #fef2f2;
+  
+  --bg-page: #f8fafc;
+  --bg-card: #ffffff;
+  --text-main: #1e293b;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  --shadow-paper: 0 12px 28px rgba(0, 0, 0, 0.12), 0 4px 10px rgba(0, 0, 0, 0.06);
+
+  --font-sans: 'Noto Sans TC', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Microsoft JhengHei", sans-serif;
+  --font-serif: 'Noto Serif TC', "Songti TC", "PMingLiU", serif;
+  --radius: 12px;
+}
+
+/* 深色模式變數 */
+body.theme-dark {
+  --bg-page: #0f172a;
+  --bg-card: #1e293b;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --border-color: #334155;
+  --primary-light: #1e1b4b;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-page);
+  color: var(--text-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* ------------------------------------------------------------------------------
+   頂部導覽列 (App Header)
+   ------------------------------------------------------------------------------ */
+.app-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-color);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.header-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.logo-icon {
+  font-size: 2rem;
+  background: var(--primary-light);
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-title {
+  font-size: 1.35rem;
+  font-weight: 900;
+  color: var(--primary);
+  letter-spacing: -0.5px;
+}
+
+.brand-subtitle {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+}
+
+/* 分頁切換按鈕群 */
+.nav-tabs {
+  display: flex;
+  background: var(--bg-page);
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid var(--border-color);
+  gap: 4px;
+}
+
+.tab-btn {
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tab-btn:hover {
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  background: var(--bg-card);
+  color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.icon-btn {
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: all 0.2s;
+}
+
+.icon-btn:hover {
+  background: var(--primary-light);
+}
+
+/* ------------------------------------------------------------------------------
+   主要內容與分頁切換
+   ------------------------------------------------------------------------------ */
+.main-container {
+  max-width: 1280px;
+  margin: 24px auto;
+  padding: 0 24px 60px;
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
+
+/* ------------------------------------------------------------------------------
+   分頁 1: A4 出題控制面板 (Toolbar)
+   ------------------------------------------------------------------------------ */
+.generator-toolbar {
+  margin-bottom: 28px;
+}
+
+.toolbar-card {
+  background: var(--bg-card);
+  border-radius: var(--radius);
+  border: 1px solid var(--border-color);
+  padding: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.toolbar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 12px;
+}
+
+.toolbar-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-block;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.badge-primary {
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.controls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.control-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.input-text, .select-box {
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-page);
+  color: var(--text-main);
+  font-size: 0.95rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.input-text:focus, .select-box:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.control-group.checkboxes {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 24px;
+  padding: 10px 14px;
+  background: var(--bg-page);
+  border-radius: 8px;
+  border: 1px dashed var(--border-color);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+
+.toolbar-buttons {
+  display: flex;
+  gap: 14px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 11px 22px;
+  border-radius: 8px;
+  border: none;
+  font-weight: 700;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-primary {
+  background: var(--primary);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-success {
+  background: var(--success);
+  color: #fff;
+}
+
+.btn-success:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-main);
+}
+
+.btn-outline:hover {
+  background: var(--primary-light);
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-sm {
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* ------------------------------------------------------------------------------
+   A4 紙張預覽容器 (Screen View)
+   ------------------------------------------------------------------------------ */
+.paper-preview-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+  padding: 10px 0;
+}
+
+.a4-paper {
+  width: 210mm;
+  min-height: 297mm;
+  padding: 16mm 18mm;
+  margin: 0 auto;
+  background: #ffffff !important;
+  color: #111111 !important;
+  box-shadow: var(--shadow-paper);
+  border-radius: 2px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  font-family: 'Noto Sans TC', "Microsoft JhengHei", sans-serif;
+}
+
+/* 考卷頭部標題區 */
+.paper-header {
+  border-bottom: 2px solid #000;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.school-header {
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.paper-title {
+  font-family: var(--font-serif);
+  font-size: 1.65rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #000 !important;
+  margin-bottom: 4px;
+}
+
+.answer-title {
+  font-family: var(--font-serif);
+  font-size: 1.5rem;
+  font-weight: 900;
+  letter-spacing: 2px;
+  color: #b91c1c !important;
+  margin-bottom: 4px;
+}
+
+.paper-subtitle {
+  font-size: 0.88rem;
+  color: #444 !important;
+  font-weight: 500;
+}
+
+/* 學生資訊欄與得分格 */
+.student-info-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #fafafa;
+  border: 1px solid #ccc;
+  padding: 6px 14px;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #000 !important;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+}
+
+.info-label {
+  color: #333;
+}
+
+.score-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.score-label {
+  font-weight: 700;
+  color: #1e293b !important;
+}
+
+.score-space {
+  display: inline-block;
+  min-width: 65px;
+  letter-spacing: 2px;
+  color: #334155;
+  font-size: 1.1rem;
+}
+
+/* 作答指引 */
+.paper-instructions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.82rem;
+  color: #555 !important;
+  margin-bottom: 16px;
+  padding: 4px 8px;
+  background: #f1f5f9;
+  border-left: 3px solid #64748b;
+}
+
+.total-marks {
+  font-weight: 700;
+  color: #1e293b !important;
+}
+
+/* 題目列表容器 */
+.questions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  flex: 1;
+}
+
+/* 雙欄模式 */
+.questions-container.layout-double {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 20px;
+  row-gap: 16px;
+}
+
+/* 單題排版 */
+.question-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  border-bottom: 1px dashed #e2e8f0;
+  padding-bottom: 14px;
+  font-size: 0.95rem;
+  line-height: 1.65;
+}
+
+.question-item:last-child {
+  border-bottom: none;
+}
+
+.q-header {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.q-bracket {
+  display: inline-block;
+  font-family: monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  color: #222;
+}
+
+.q-number {
+  font-weight: 800;
+  color: #000;
+}
+
+.q-badge {
+  font-size: 0.72rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #334155;
+  font-weight: 600;
+  margin-left: 4px;
+}
+
+.q-body {
+  margin-left: 4px;
+  color: #111;
+  font-weight: 500;
+}
+
+.q-body .cloze-blank {
+  font-weight: 900;
+  color: #000;
+  letter-spacing: 2px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  padding: 0 4px;
+}
+
+.q-zhuyin-tag {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-left: 6px;
+}
+
+.q-hint-text {
+  font-size: 0.84rem;
+  color: #666;
+  margin-top: 3px;
+  padding-left: 20px;
+}
+
+/* 選擇題選項列 */
+.q-options-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+  padding-left: 20px;
+}
+
+.q-option-choice {
+  font-size: 0.9rem;
+  color: #222;
+}
+
+.q-option-choice b {
+  color: #000;
+  margin-right: 2px;
+}
+
+/* 照樣造句 / 句型練習 手寫作答橫線格 */
+.q-handwrite-box {
+  margin-top: 10px;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.q-example-prompt {
+  font-size: 0.95rem;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-left: 4px solid #10b981;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: #1e293b;
+}
+
+.q-example-prompt .ex-tag {
+  font-weight: 800;
+  color: #059669;
+  margin-right: 6px;
+}
+
+.q-pattern-template {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: #eef2ff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #c7d2fe;
+  border-left: 4px solid #6366f1;
+}
+
+.q-pattern-template .pat-tag {
+  font-weight: 800;
+  color: #4f46e5;
+  margin-right: 6px;
+}
+
+.q-student-write-guide {
+  font-size: 0.88rem;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.handwrite-line {
+  border-bottom: 1.5px dashed #94a3b8;
+  height: 24px;
+  width: 100%;
+}
+
+/* 解答券頁面 (Answer Key Page) */
+.answer-key-page {
+  page-break-before: always;
+  break-before: page;
+}
+
+.answer-key-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  flex: 1;
+}
+
+.answer-item {
+  page-break-inside: avoid;
+  break-inside: avoid;
+  background: #fafafa;
+  border: 1px solid #e5e7eb;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+
+.ans-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.ans-badge {
+  background: #dcfce7;
+  color: #166534;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.82rem;
+}
+
+.ans-word {
+  color: #b91c1c;
+  font-size: 1.05rem;
+}
+
+.ans-zhuyin {
+  color: #4b5563;
+  font-weight: normal;
+  font-size: 0.85rem;
+}
+
+.ans-desc {
+  color: #374151;
+  font-size: 0.86rem;
+  margin-top: 2px;
+}
+
+.ans-full-ex {
+  color: #111827;
+  font-weight: 600;
+  margin-top: 4px;
+  padding-left: 10px;
+  border-left: 2px solid #cbd5e1;
+}
+
+/* 考卷頁腳 */
+.paper-footer {
+  margin-top: 20px;
+  border-top: 1px solid #e2e8f0;
+  padding-top: 8px;
+  text-align: center;
+  font-size: 0.75rem;
+  color: #94a3b8;
+}
+
+/* ------------------------------------------------------------------------------
+   分頁 2: 線上互動測驗 (Online Quiz)
+   ------------------------------------------------------------------------------ */
+.online-quiz-wrapper {
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.quiz-controls-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 16px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.quiz-mode-selector {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quiz-mode-selector label {
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.mode-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mode-chip {
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.mode-chip:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.mode-chip.active {
+  background: var(--primary);
+  color: #fff;
+  border-color: var(--primary);
+  box-shadow: var(--shadow-sm);
+}
+
+.quiz-stats-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border-color);
+}
+
+.stat-pill {
+  font-size: 0.92rem;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stat-pill b {
+  color: var(--primary);
+  font-size: 1.1rem;
+}
+
+/* 互動測驗卡片 */
+.quiz-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.quiz-hint {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.question-prompt {
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1.6;
+  margin-bottom: 20px;
+  color: var(--text-main);
+}
+
+.question-prompt .quiz-blank {
+  color: var(--primary);
+  text-decoration: underline;
+  text-underline-offset: 6px;
+  font-weight: 900;
+  padding: 0 4px;
+}
+
+.prompt-hint-box {
+  background: var(--primary-light);
+  border-left: 4px solid var(--primary);
+  padding: 12px 18px;
+  border-radius: 6px;
+  margin-bottom: 24px;
+  font-size: 0.95rem;
+  color: var(--text-main);
+}
+
+.options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 24px;
+}
+
+/* ------------------------------------------------------------------------------
+   重組造句互動組件樣式 (Unscramble UI)
+   ------------------------------------------------------------------------------ */
+.unscramble-interactive-box {
+  margin-bottom: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+.unscramble-result-tray {
+  background: var(--bg-page);
+  border: 2px dashed var(--primary);
+  border-radius: 10px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.tray-label {
+  font-weight: 700;
+  color: var(--primary);
+  font-size: 0.95rem;
+}
+
+.tray-slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  flex: 1;
+}
+
+.empty-hint {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.unscramble-cards-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.unscramble-card-btn {
+  background: var(--bg-page);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 14px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.unscramble-card-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.unscramble-card-btn.selected {
+  opacity: 0.4;
+  cursor: not-allowed;
+  border-style: dashed;
+}
+
+.unscramble-chip {
+  background: var(--primary);
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  animation: popIn 0.2s ease;
+}
+
+@keyframes popIn {
+  from { transform: scale(0.85); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+/* 錯別字特別標示 */
+.typo-mark-inline {
+  color: #dc2626;
+  text-decoration: underline wavy #dc2626;
+  text-underline-offset: 4px;
+  font-weight: 900;
+  padding: 0 2px;
+}
+
+.quiz-option-btn {
+  background: var(--bg-page);
+  border: 2px solid var(--border-color);
+  border-radius: 10px;
+  padding: 16px 20px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-main);
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.quiz-option-btn:hover:not(:disabled) {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  transform: translateY(-2px);
+}
+
+.quiz-option-btn.correct {
+  border-color: var(--success);
+  background: var(--success-light);
+  color: #065f46;
+}
+
+.quiz-option-btn.wrong {
+  border-color: var(--danger);
+  background: var(--danger-light);
+  color: #991b1b;
+}
+
+.interactive-write-box textarea {
+  width: 100%;
+  height: 90px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 1rem;
+  font-family: inherit;
+  background: var(--bg-page);
+  color: var(--text-main);
+  margin-bottom: 12px;
+  resize: vertical;
+}
+
+.explanation-box {
+  background: var(--bg-page);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  padding: 20px;
+  margin-top: 24px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-status {
+  font-size: 1.2rem;
+  font-weight: 900;
+  margin-bottom: 8px;
+}
+
+.result-status.success { color: var(--success); }
+.result-status.error { color: var(--danger); }
+
+.correct-answer-text {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 6px;
+}
+
+.full-example-text {
+  font-size: 0.95rem;
+  color: var(--text-main);
+  background: var(--bg-card);
+  padding: 10px 14px;
+  border-radius: 6px;
+  border-left: 3px solid var(--primary);
+  margin-bottom: 12px;
+}
+
+.detail-props {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+}
+
+/* ------------------------------------------------------------------------------
+   分頁 3: 題庫字典檢索 (Dictionary View)
+   ------------------------------------------------------------------------------ */
+.dict-wrapper {
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.search-bar-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+}
+
+.search-inputs {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.input-search {
+  flex: 1;
+  min-width: 280px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-page);
+  color: var(--text-main);
+  font-size: 1rem;
+  outline: none;
+}
+
+.input-search:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
+}
+
+.dict-stats-info {
+  margin-top: 10px;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.dict-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+
+.dict-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.dict-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.dict-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.dict-word-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--primary);
+}
+
+.dict-zhuyin {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.dict-def {
+  font-size: 0.92rem;
+  color: var(--text-main);
+  line-height: 1.5;
+}
+
+.dict-ex {
+  background: var(--bg-page);
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 3px solid var(--primary);
+  font-size: 0.88rem;
+  color: var(--text-main);
+}
+
+.load-more-container {
+  text-align: center;
+  margin-top: 24px;
+}
+
+/* ==============================================================================
+   專業 A4 列印引擎規則 (@media print)
+   ============================================================================== */
+@page {
+  size: A4 portrait;
+  margin: 12mm 14mm 12mm 14mm;
+}
+
+@media print {
+  /* 隱藏一切導航與按鈕介面 */
+  .no-print,
+  .app-header,
+  .generator-toolbar,
+  #online-view,
+  #dict-view,
+  .toolbar-buttons,
+  .nav-tabs {
+    display: none !important;
+  }
+
+  /* 保證容器滿版與白底黑字 */
+  body, html {
+    background: #ffffff !important;
+    color: #000000 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .main-container {
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #print-view {
+    display: block !important;
+  }
+
+  .paper-preview-wrapper {
+    gap: 0 !important;
+    padding: 0 !important;
+  }
+
+  .a4-paper {
+    width: 100% !important;
+    min-height: auto !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    page-break-after: always;
+    break-after: page;
+  }
+
+  /* 解答頁獨立產生新頁 */
+  .answer-key-page {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+
+  /* 題目跨頁防斷行 */
+  .question-item, .answer-item {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+
+  /* 確保底線與表格列印正常 */
+  .handwrite-line {
+    border-bottom: 1.5px dashed #000000 !important;
+  }
+
+  .q-example-prompt {
+    background: #ffffff !important;
+    border: 1px solid #666666 !important;
+    border-left: 4px solid #000000 !important;
+    color: #000000 !important;
+  }
+
+  .q-example-prompt .ex-tag {
+    color: #000000 !important;
+  }
+
+  .q-pattern-template {
+    background: #ffffff !important;
+    border: 1px solid #666666 !important;
+    border-left: 4px solid #000000 !important;
+    color: #000000 !important;
+  }
+
+  .q-pattern-template .pat-tag {
+    color: #000000 !important;
+  }
+
+  .student-info-box {
+    background: #ffffff !important;
+    border: 1px solid #000000 !important;
+  }
+}
+
+/* 響應式調整 */
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .nav-tabs {
+    overflow-x: auto;
+  }
+
+  .options-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .a4-paper {
+    width: 100%;
+    padding: 16px;
+  }
+
+  .q-options-row {
+    grid-template-columns: 1fr 1fr;
+  }
+}
