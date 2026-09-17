@@ -912,10 +912,10 @@
 
   /**
    * 為短語照樣造句生成具體的「建議仿寫參考答案」與「句構語法特徵解析」
-   * 確保解答券提供至少 1～2 個結構對齊、詞性對應且文意通順的示範答案供批改與學習
+   * 確保解答券提供至少 1～3 個結構對齊、詞性對應且文意通順的示範答案供批改與學習
    */
   function getSentenceMimicGuidance(item) {
-    const raw = (item.word || item.example || item.title || '').replace(/[。！?？]/g, '').trim();
+    const raw = (item.template || item.word || item.example || item.title || '').replace(/[。！?？]/g, '').trim();
     const clean = raw.replace(/[()（）]/g, '').trim();
 
     // 1. 精準對應庫 (涵蓋最核心、常見的課本經典短語)
@@ -1015,93 +1015,351 @@
       }
     }
 
-    // 2. 智慧句構規則推論引擎 (覆蓋任意短語題目)
-    if (clean.includes('像') && clean.includes('般') && clean.includes('的')) {
+    // 2. 複句句構推論引擎 (含逗號/頓號分句，確保前後分句字數、對稱與語氣連貫)
+    if (clean.includes('，') || clean.includes(',')) {
+      // 2a. 時間對比複句: 當...漸漸...，...卻...
+      if (clean.startsWith('當') && clean.includes('卻')) {
+        return {
+          structure: '時間對比複句：當（主詞）漸漸（狀態/動作），（主詞）卻逐一（動作/狀態）',
+          suggestions: [
+            '當大地漸漸復甦甦醒，寒雪卻逐一融化',
+            '當朝陽漸漸驅散濃霧，晨星卻逐一隱沒',
+            '當春風漸漸拂暖大地，冬霜卻逐一消逝'
+          ]
+        };
+      }
+      if (clean.startsWith('當') && (clean.includes('時') || clean.includes('就'))) {
+        return {
+          structure: '時間承接複句：當（事件/狀態）時，（動作/後果）',
+          suggestions: [
+            '當微風吹拂大地時，群花紛紛綻放笑靨',
+            '當夜幕籠罩大地時，星辰悄悄點亮夜空',
+            '當陽光灑落林梢時，鳥兒歡快啼唱晨曦'
+          ]
+        };
+      }
+      // 2b. 比喻排比複句: ...像...、像...
+      if (clean.includes('像') && (clean.includes('、') || clean.split('像').length > 2)) {
+        return {
+          structure: '比喻排比複句：（事物），像（比喻一）、像（比喻二），（動態描摹）',
+          suggestions: [
+            '雪，像白羽、像棉絮，輕輕的漫天飛舞',
+            '雲，像綿羊、像棉花，自在的漫步晴空',
+            '露珠，像水晶、像珍珠，晶瑩的凝於草梢'
+          ]
+        };
+      }
+      // 2c. 承接感悟複句: ...讓人不得不... / ...令人不得不...
+      if (clean.includes('讓') && clean.includes('不得不')) {
+        return {
+          structure: '因果感悟複句：（前情景致），讓人不得不（雙音節動作）（動作態勢）',
+          suggestions: [
+            '微風送來陣陣花香，讓人不得不放慢腳步細細品味',
+            '眼前展現浩瀚山川，讓人不得不心生讚嘆肅然起敬',
+            '美景令人心馳神往，讓人不得不駐足凝望流連忘返'
+          ]
+        };
+      }
+      // 2d. 比喻描摹複句: ...好像... / ...猶如... / ...有如...
+      if (clean.includes('好像') || clean.includes('猶如') || clean.includes('有如')) {
+        return {
+          structure: '情境比喻複句：（景致描摹），好像（比喻情境）',
+          suggestions: [
+            '彎彎的月兒掛在天上，好像一隻金色的小船',
+            '平靜的湖面映著青山，猶如一面明淨的碧玉',
+            '滿天的繁星閃爍光芒，有如落入夜空的碎鑽'
+          ]
+        };
+      }
+      // 2e. 通用對稱複句仿寫保底
       return {
-        structure: '比喻句構：像（名詞）般（形容詞）的（名詞）',
-        suggestions: ['像水晶般清澈的泉水', '像羽毛般輕盈的雪花', '像明鏡般平靜的湖面']
+        structure: '對稱複句仿寫：（前句描摹景況），（後句敘寫動態或感懷）',
+        suggestions: [
+          '清風拂面心舒暢，鳥語花香意盎然',
+          '朝陽灑落林間暖，晨露晶瑩草木青',
+          '春雨綿綿潤萬物，秋風瑟瑟染霜林'
+        ]
       };
     }
-    if (clean.includes('且') && clean.includes('的')) {
+
+    // 3. 智慧短語句構推論引擎 (單句與短語，依文法嚴格對齊)
+    // 3a. 使動疊代短語: 讓...一...又一... (如 讓觀眾經歷一場又一場的冒險)
+    if (clean.includes('讓') && (clean.includes('又一') || clean.includes('又'))) {
       return {
-        structure: '並列修飾句構：（形容詞）且（形容詞）的（偏正名詞）',
-        suggestions: ['溫和且堅定的處事態度', '豐富且多元的課外閱讀', '誠懇且真摯的友誼連結']
+        structure: '使動疊代句構：讓（對象）（動作）一（量詞）又一（量詞）的（名詞）',
+        suggestions: [
+          '讓讀者感受一次又一次的感動',
+          '讓學子跨越一個又一個的難關',
+          '讓選手迎接一場又一場的挑戰'
+        ]
       };
     }
-    if (clean.includes('而') && clean.includes('的')) {
+
+    // 3b. 時態動賓短語: ...了... (如 面臨了諸多挑戰, 拉近了人與人之間的距離)
+    if (clean.includes('了') && clean.length <= 14) {
+      if (clean.includes('人與人') || clean.includes('之間')) {
+        return {
+          structure: '動態關聯句構：（動詞）了（名詞）與（名詞）之間的（名詞）',
+          suggestions: [
+            '搭起了心靈與心靈之間的橋梁',
+            '增進了老師與學生之間的感情',
+            '化解了彼此與彼此之間的誤會'
+          ]
+        };
+      }
       return {
-        structure: '轉折遞進句構：（形容詞）而（有偏正/形容詞）的（名詞）',
-        suggestions: ['勤奮而有毅力的學者', '深奧而有哲理的故事', '簡約而有質感的佈置']
+        structure: '時態動賓句構：（雙音節動詞）了（修飾語＋名詞）',
+        suggestions: [
+          '克服了重重困難',
+          '累積了豐富經驗',
+          '化解了許多危機',
+          '經歷了無數考驗'
+        ]
       };
     }
-    if (clean.includes('一面') || clean.includes('一邊')) {
+
+    // 3c. 程度補語句構: ...得... (如 感動得淚如雨下, 笑得合不攏嘴)
+    if (clean.includes('得')) {
       return {
-        structure: '並列動作句構：一邊（雙音節動作）、一邊（雙音節動作）',
-        suggestions: ['一邊唱歌、一邊跳舞', '時而奔跑、時而停留', '一邊閱讀、一邊筆記']
+        structure: '程度補語句構：（動詞/形容詞）得（補語/四字成語）',
+        suggestions: [
+          '感動得熱淚盈眶',
+          '高興得手舞足蹈',
+          '急得滿頭大汗',
+          '笑得合不攏嘴'
+        ]
       };
     }
-    if (clean.includes('著') && (clean.includes('上') || clean.includes('裡') || clean.includes('中'))) {
+
+    // 3d. 比喻修飾短語: 像...般... / 猶如...般... / 像...一樣... / ...像...
+    if (clean.includes('像') || clean.includes('猶如') || clean.includes('有如') || clean.includes('好似')) {
+      if (clean.includes('般') || clean.includes('一樣') || clean.includes('那樣')) {
+        return {
+          structure: '比喻修飾句構：像（名詞）般（形容詞）的（名詞）',
+          suggestions: [
+            '像水晶般清澈的湖水',
+            '像羽毛般輕盈的雪花',
+            '像明鏡般平靜的湖面'
+          ]
+        };
+      }
       return {
-        structure: '動態空間句構：（動詞）著（名詞）（空間方位詞）的（名詞）',
-        suggestions: ['望著窗台上的鮮花', '數著夜空中的繁星', '撫著琴弦上的旋律']
+        structure: '本體喻體比喻句：（名詞）像（形容詞）的（名詞）',
+        suggestions: [
+          '真摯的友誼像溫暖的春風',
+          '老師的教誨像明燈指引方向',
+          '母親的慈愛像溫煦的陽光'
+        ]
       };
     }
-    if (clean.includes('一陣') || clean.includes('一回') || clean.includes('一次')) {
+
+    // 3e. 時空延展句構: 從...到...
+    if (clean.includes('從') && clean.includes('到')) {
       return {
-        structure: '節奏交替句構：（名詞）＋ 一陣（形容詞）一陣（形容詞）',
-        suggestions: ['心情一陣欣喜一陣擔憂', '微風一陣涼爽一陣溫暖', '浪花一陣平緩一陣洶湧']
+        structure: '時空延展句構：從（起點）到（終點）',
+        suggestions: [
+          '從清晨到黃昏',
+          '從高山到大海',
+          '從陌生到熟悉'
+        ]
       };
     }
-    if (/^[一兩三四五六七八九十滿整片條座輪抹個疊本棵].+的.+/.test(clean)) {
+
+    // 3f. 判斷比喻肯定句: ...是...
+    if (clean.includes('是')) {
       return {
-        structure: '數量修飾句構：（數量/量詞）＋（形容詞）的（名詞）',
-        suggestions: ['一抹湛藍的晴空', '一片金黃的麥浪', '一輪皎潔的明月']
+        structure: '比喻肯定句構：（事物）是（數量詞/修飾語）（賓語）',
+        suggestions: [
+          '知識是航向未來的羅盤',
+          '童年是一幅斑斕的畫卷',
+          '書籍是通往智慧的階梯'
+        ]
       };
     }
-    if (clean.includes('一') && clean.includes('成長')) {
-      return {
-        structure: '使動發展句構：讓（名詞）一（量詞疊字）（動詞）',
-        suggestions: ['讓幼苗一株株茁壯', '讓夢想一步步實現', '讓知識一點點累積']
-      };
-    }
-    if (clean.includes('一') && clean.includes('的')) {
+
+    // 3g. 動作感官重疊: (動)一(動)...的... (嚴格限定首字與第三字相同且次字為「一」，如 看一看、聽一聽、聞一聞)
+    if (clean.length >= 4 && clean[1] === '一' && clean[0] === clean[2] && clean.includes('的')) {
       return {
         structure: '動作感官句構：（動詞）一（動詞）＋（名詞）的（名詞）',
-        suggestions: ['看一看天邊的彩霞', '聽一聽林間的鳥鳴', '品一品茶湯的芬芳']
+        suggestions: [
+          '看一看天邊的彩霞',
+          '聽一聽林間的鳥鳴',
+          '嚐一嚐鮮果的滋味',
+          '品一品茶湯的芬芳'
+        ]
       };
     }
+
+    // 3h. 數量疊字修飾: 一[量量]...的... (如 一枝枝修長平順的稜骨，限定 clean[1] === clean[2])
+    if (clean.length >= 4 && clean[0] === '一' && clean[1] === clean[2] && clean.includes('的')) {
+      return {
+        structure: '數量疊字句構：一（量詞疊字）（四字形容詞）的（名詞）',
+        suggestions: [
+          '一朵朵嬌豔美麗的花朵',
+          '一顆顆晶瑩剔透的露珠',
+          '一片片金黃耀眼的落葉'
+        ]
+      };
+    }
+
+    // 3i. 數量疊代修飾: 一(量)又一(量)的(名詞)
+    if ((clean.includes('又一') || clean.includes('又')) && clean.includes('的')) {
+      return {
+        structure: '數量疊代句構：一（量詞）又一（量詞）的（名詞）',
+        suggestions: [
+          '一次又一次的挑戰',
+          '一波又一波的浪潮',
+          '一步又一步的堅持'
+        ]
+      };
+    }
+
+    // 3j. 趨向動賓短語: ...出...的... (如 展現出無比的勇氣, 寫出動人的故事，限定 出 在 的 之前)
+    if (clean.includes('出') && clean.includes('的') && clean.indexOf('出') < clean.indexOf('的')) {
+      return {
+        structure: '趨向動賓句構：（動詞）出（形容詞）的（名詞）',
+        suggestions: [
+          '綻放出燦爛的笑容',
+          '散發出迷人的芬芳',
+          '譜寫出動人的樂章'
+        ]
+      };
+    }
+
+    // 3k. 動態空間方位: ...著...[上/下/中/裡/間]的...
+    if (clean.includes('著') && (clean.includes('上') || clean.includes('下') || clean.includes('中') || clean.includes('裡') || clean.includes('間'))) {
+      return {
+        structure: '動態空間句構：（動詞）著（處所詞）的（名詞）',
+        suggestions: [
+          '望著窗台上的鮮花',
+          '數著夜空中的繁星',
+          '撫著琴弦上的旋律'
+        ]
+      };
+    }
+
+    // 3l. 伴隨動態句構: ...著...
+    if (clean.includes('著')) {
+      return {
+        structure: '伴隨動態句構：（動詞）著（形容詞/名詞）',
+        suggestions: [
+          '懷著感恩的心情',
+          '迎著溫暖的微風',
+          '帶著自信的笑容'
+        ]
+      };
+    }
+
+    // 3m. 目的短語: 為了...更...
     if (clean.includes('為了') && clean.includes('更')) {
       return {
         structure: '目的句構：為了（動詞）更（形容詞）的（名詞）',
-        suggestions: ['為了追求更卓越的成就', '為了開創更美好的明天', '為了守護更純真的童心']
+        suggestions: [
+          '為了追求更卓越的表現',
+          '為了創造更美好的明天',
+          '為了守護更珍貴的友誼'
+        ]
       };
-    }
-    if (clean.includes('都是') && clean.includes('的')) {
-      return {
-        structure: '全景描摹句構：（處所名詞）都是（疊字狀態詞）的（名詞）',
-        suggestions: ['遍地都是金燦燦的落葉', '整座都是香噴噴的花海', '滿眼都是綠油油的草地']
-      };
-    }
-    if (clean.includes('的')) {
-      const parts = clean.split('的');
-      if (parts[0].length >= 3) {
-        return {
-          structure: `多音節偏正句構：（${parts[0]}）的（${parts[1] || '名詞'}）`,
-          suggestions: ['深情且動人的旋律', '璀璨而耀眼的晨星', '溫暖而舒適的陽光']
-        };
-      } else {
-        return {
-          structure: `形容詞偏正句構：（形容詞）的（名詞）`,
-          suggestions: ['湛藍的天空', '翠綠的群山', '清澈的溪流']
-        };
-      }
     }
 
-    // 3. 通用標準保底答案
-    return {
-      structure: '詞性與句構對齊仿寫（字數相近、詞性對應、語意連貫）',
-      suggestions: ['漫步在寧靜的林間小徑', '迎接著清晨的第一道朝陽']
-    };
+    // 3n. 全景存在句構: ...都是... / ...滿是...
+    if ((clean.includes('都是') || clean.includes('滿是')) && clean.includes('的')) {
+      return {
+        structure: '全景描摹句構：（處所詞）都是（疊字狀態詞）的（名詞）',
+        suggestions: [
+          '遍地都是金燦燦的落葉',
+          '整座都是香噴噴的花海',
+          '湖面都是藍汪汪的波光'
+        ]
+      };
+    }
+
+    // 3o. 使動發展句構: 讓...
+    if (clean.includes('讓')) {
+      return {
+        structure: '使動發展句構：讓（名詞）（副詞/量詞）（動詞）',
+        suggestions: [
+          '讓幼苗一株株茁壯',
+          '讓夢想一步步實現',
+          '讓友誼一天天加深'
+        ]
+      };
+    }
+
+    // 3p. 並列修飾句構: ...且...的...
+    if (clean.includes('且') && clean.includes('的')) {
+      return {
+        structure: '並列修飾句構：（形容詞）且（形容詞）的（名詞）',
+        suggestions: [
+          '溫和且堅定的處事態度',
+          '豐富且多元的課外閱讀',
+          '誠懇且真摯的友誼連結'
+        ]
+      };
+    }
+
+    // 3q. 遞進修飾句構: ...而...的...
+    if (clean.includes('而') && clean.includes('的')) {
+      return {
+        structure: '遞進修飾句構：（形容詞）而（有偏正/形容詞）的（名詞）',
+        suggestions: [
+          '勤奮而有毅力的學者',
+          '深奧而有哲理的故事',
+          '簡約而有質感的佈置'
+        ]
+      };
+    }
+
+    // 3r. 介賓處所句構: 在...[中/下/間/上/裡]...
+    if (clean.startsWith('在') && (clean.includes('中') || clean.includes('下') || clean.includes('間') || clean.includes('上') || clean.includes('裡'))) {
+      return {
+        structure: '介賓處所句構：在（處所詞）＋（副詞/形容詞）（動詞）',
+        suggestions: [
+          '在山林間自在奔跑',
+          '在陽光下閃閃發光',
+          '在微風中輕輕搖曳'
+        ]
+      };
+    }
+
+    // 3s. 偏正結構: ...的...
+    if (clean.includes('的')) {
+      const parts = clean.split('的');
+      const mod = parts[0];
+      
+      // 疊字形容詞偏正: 滾滾的洪水, 蔚藍的大海
+      if (mod.length === 2 && mod[0] === mod[1]) {
+        return {
+          structure: '疊字偏正句構：（疊字形容詞）的（雙音節名詞）',
+          suggestions: ['滔滔的江水', '漫漫的長夜', '冉冉的朝陽']
+        };
+      }
+      // 雙音節形容詞偏正: 蒼翠的山嶺, 有趣的繞口令
+      if (mod.length <= 3) {
+        return {
+          structure: '形容詞偏正句構：（雙音節形容詞）的（雙音節名詞）',
+          suggestions: ['蔚藍的晴空', '清澈的溪流', '皎潔的月光']
+        };
+      }
+      // 多音節/動賓偏正: 激發自己的潛能, 踏上尋夢的旅程
+      return {
+        structure: '動賓偏正句構：（動賓/修飾語）的（中心名詞）',
+        suggestions: ['實現心中的夢想', '揚起希望的風帆', '翻開歷史的篇章']
+      };
+    }
+
+    // 3t. 動賓短語: (動詞)＋(名詞) (無「的」無逗號)
+    if (clean.length <= 4) {
+      return {
+        structure: '雙音節動賓短語：（動詞）＋（名詞）',
+        suggestions: ['綻放笑容', '揮灑汗水', '追逐夢想']
+      };
+    } else {
+      return {
+        structure: '動賓連動短語：（副詞/狀語）＋（動詞）＋（名詞）',
+        suggestions: ['認真翻找書本', '默默許下心願', '勇敢迎接挑戰']
+      };
+    }
   }
 
   // ============================================================================
@@ -1392,7 +1650,7 @@
         // 照樣造句題 (純例句自由仿寫，可勾選顯示骨架結構)
         q._correctLetter = '照樣仿寫題（參見標準範例）';
         
-        const exampleText = (q.example || q.title || '').replace(/[()（）]/g, '').replace(/。$/, '');
+        const exampleText = (q.template || q.example || q.title || q.word || '').replace(/[()（）]/g, '').replace(/。$/, '');
         let templateText = q.template || q.title || '';
         if (!templateText.includes('　') && templateText.includes('(')) {
           templateText = templateText.replace(/\(([^)]+)\)/g, '(　　)');
@@ -1506,7 +1764,7 @@
           <div class="ans-full-ex"><b>【重組完整句子】</b>${q.cleanSentence}。</div>
         `;
       } else if (q.quizType === 'sentence') {
-        const exampleText = (q.example || q.title || '').replace(/[()（）]/g, '').replace(/。$/, '');
+        const exampleText = (q.template || q.example || q.title || q.word || '').replace(/[()（）]/g, '').replace(/。$/, '');
         const guidance = getSentenceMimicGuidance(q);
 
         ansDiv.innerHTML = `
@@ -1682,7 +1940,7 @@
       elements.quizWriteContainer.style.display = 'block';
       elements.txtUserWriting.value = '';
 
-      const exampleText = (q.example || q.title || '').replace(/[()（）]/g, '').replace(/。$/, '');
+      const exampleText = (q.template || q.example || q.title || q.word || '').replace(/[()（）]/g, '').replace(/。$/, '');
 
       elements.quizQuestionPrompt.innerHTML = `
         <div style="font-size:1.05rem; font-weight:700; color:#1e293b; margin-bottom:12px;">請體會示範短語的詞性節奏，發揮創意照樣仿寫：</div>
@@ -1849,7 +2107,8 @@
     if (q.quizType === 'sentence') {
       const guidance = getSentenceMimicGuidance(q);
       elements.quizCorrectAnswer.innerHTML = `建議仿寫答案：<strong>${guidance.suggestions[0]}</strong>${guidance.suggestions[1] ? ` 或 <strong>${guidance.suggestions[1]}</strong>` : ''}`;
-      elements.quizFullExample.innerHTML = `<strong>題目原示範：</strong>${q.example || q.title}<br><strong>句構特徵解析：</strong>${guidance.structure}<br><span style="color:#64748b; font-size:0.85rem;">評分原則：本題為開放式仿寫，只要詞性搭配與節奏對齊、語意通順即可滿分。</span>`;
+      const cleanPrompt = (q.template || q.example || q.title || q.word || '').replace(/[()（）]/g, '');
+      elements.quizFullExample.innerHTML = `<strong>題目原示範：</strong>${cleanPrompt}<br><strong>句構特徵解析：</strong>${guidance.structure}<br><span style="color:#64748b; font-size:0.85rem;">評分原則：本題為開放式仿寫，只要詞性搭配與節奏對齊、語意通順即可滿分。</span>`;
     } else {
       elements.quizCorrectAnswer.innerHTML = `標準參考：<strong>${q.example}</strong>`;
       elements.quizFullExample.innerHTML = `<strong>結構解析：</strong>${q.definition || '詞性結構對齊，語意通順完整。'}`;
