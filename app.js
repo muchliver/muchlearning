@@ -1035,6 +1035,27 @@
     renderAnswerKey(finalQuestions);
   }
 
+  // 輔助函式：依選項長度與題型智慧計算選項欄數，徹底避免注音或長文字重疊碰撞
+  function renderOptionsHtml(options, letters, subType) {
+    if (!options || !options.length) return '';
+    const maxLen = Math.max(...options.map(o => (o || '').toString().length));
+    let colsClass = 'cols-4';
+    // 若為看字辨注音（注音字元多且包含聲調與空格）或選項長度大於 5 個字，自動採用 2 欄寬排
+    if (subType === 'write_zhuyin' || maxLen > 5) {
+      colsClass = 'cols-2';
+    }
+    // 若選項特別長（長句或長複句，大於 22 字），採用單欄排列
+    if (maxLen > 22) {
+      colsClass = 'cols-1';
+    }
+
+    return `
+      <div class="q-options-row ${colsClass}">
+        ${options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> <span>${opt}</span></div>`).join('')}
+      </div>
+    `;
+  }
+
   function renderPaperQuestions(questions, showZhuyin) {
     elements.printableQuestionsList.innerHTML = '';
     const letters = ['A', 'B', 'C', 'D'];
@@ -1059,9 +1080,7 @@
             <span style="font-weight:700; color:#111;">${q.promptLabel || '【國字注音測驗】'}</span>
           </div>
           <div class="q-body">${q.promptSentence}</div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.subType)}
           <div style="font-size:0.86rem; color:#475569; margin-top:8px; padding-left:20px;">
             ✍️ ${q.handwriteHint}
           </div>
@@ -1079,9 +1098,7 @@
             <span style="font-weight:700; color:#111;">【文意相近詞語替換】</span>
           </div>
           <div class="q-body">${q.promptSentence}</div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
         `;
       } else if (q.quizType === 'situational') {
         // 成語生活情境素養題
@@ -1098,9 +1115,7 @@
           <div class="q-body" style="background:#fdfdfd; padding:8px 12px; border-left:3px solid #f59e0b; border-radius:4px; margin:4px 0 8px 0;">
             ${q.promptSentence}
           </div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
         `;
       } else if (q.quizType === 'conjunction') {
         // 關聯詞複句邏輯選擇題
@@ -1115,9 +1130,7 @@
             <span style="font-weight:700; color:#111;">【複句邏輯連詞選擇】</span>
           </div>
           <div class="q-body">${q.promptSentence}</div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
         `;
       } else if (q.quizType === 'typo') {
         // 錯字訂正題
@@ -1135,9 +1148,7 @@
             ${zhuyinHtml}
           </div>
           <div class="q-body">下列文句中畫底線處含有一個錯別字，請選出改正後的正確字：<br>「${sentenceWithMark}」</div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
         `;
       } else if (q.quizType === 'unscramble') {
         // 重組造句題
@@ -1157,9 +1168,7 @@
               ${q.labeledCards.map(c => `<span><b>${c.label}、</b>${c.text}</span>`).join('　')}
             </div>
           </div>
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
           <div style="font-size:0.86rem; color:#475569; margin-top:8px; padding-left:20px;">
             ✍️ 重組排序：( 　 ) ➔ ( 　 ) ➔ ( 　 ) ➔ ( 　 )
           </div>
@@ -1209,9 +1218,7 @@
           </div>
           <div class="q-body">${q.promptSentence}</div>
           ${q.definition ? `<div class="q-hint-text">💡 提示：${q.definition}</div>` : ''}
-          <div class="q-options-row">
-            ${q.options.map((opt, oIdx) => `<div class="q-option-choice"><b>(${letters[oIdx]})</b> ${opt}</div>`).join('')}
-          </div>
+          ${renderOptionsHtml(q.options, letters, q.quizType)}
         `;
       }
 
